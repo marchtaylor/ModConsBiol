@@ -1452,7 +1452,7 @@ mat.repro(L)
 \newpage
 ## Case Study: Whitetip reef shark (Triaenodom obesus)
 
-```{r, fig.align="center", fig.cap="Whitetip reef shark (Triaenodom obesus). Credit: Pascal Irz, FishBase."}
+```{r, echo=FALSE, fig.align="center", fig.cap="Whitetip reef shark (Triaenodom obesus). Credit: Pascal Irz, FishBase."}
 knitr::include_graphics("figures/t_obesus.jpg")
 ```
 
