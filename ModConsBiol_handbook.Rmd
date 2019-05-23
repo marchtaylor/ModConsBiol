@@ -2,7 +2,7 @@
 title: "Modelling in Conservation Biology"
 subtitle: "Practical handbook and case study examples using R"
 author: 
-  - Marc H. Taylor^[Thuenen Institute of Sea Fisheries, Hamburg, Germany]
+  - Marc H. Taylor^[Thuenen Institute of Sea Fisheries, Bremerhaven, Germany]
 date: "`r Sys.Date()`"
 # header-includes:
 #   \usepackage{caption}
@@ -27,7 +27,8 @@ bibliography: refs.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  fig.width=6, fig.height=5
+  fig.width=6, fig.height=5,
+  cache=TRUE
   # fig.pos = "H"
 )
 ```
@@ -36,6 +37,7 @@ knitr::opts_chunk$set(
 
 
 ```{r, echo=FALSE, fig.align="center"}
+# img <- readJPEG("figures/Turtle_golfina_escobilla_oaxaca_mexico_claudio_giovenzana_2010.jpg")
 knitr::include_graphics("figures/Turtle_golfina_escobilla_oaxaca_mexico_claudio_giovenzana_2010.jpg", dpi = 150)
 ```
 
@@ -782,10 +784,10 @@ N = NA*time # empty vector of length time
 N[1] = 10 # initial population size
 R = 1.1
 R_sd = 0.2
+set.seed(1)
 Rs <- rnorm(length(N),mean=R,sd=R_sd)
 
 # loop for the calculation
-set.seed(1)
 for (i in 2:length(N)){
 	N[i] = Rs[i-1] * N[i-1]
 }
@@ -804,10 +806,10 @@ N = matrix(NA, nrow=length(time), ncol=runs)
 N[1,] = 10 # initial population size
 R = 1.1 # growth rate
 R_sd = 0.2 # standard deviation of growth rate
+set.seed(1)
 Rs <- array(rnorm(length(N), mean=R, sd=R_sd), dim = dim(N))
 
 # loop for each run
-set.seed(1)
 for(j in 1:runs){
 	# loop for each time step
 	for (i in 2:length(N[,j])){
@@ -850,6 +852,12 @@ par(op)
 
 #	Population viability analysis (PVA)
 ## Case Study: White Rhino (*Ceratotherium simum*)
+
+```{r, echo=FALSE, fig.align="center"}
+knitr::include_graphics("figures/800px-White_rhino_2008_08.jpg", dpi = 150)
+```
+
+
 This example bases on demographical studies about the white rhinoceros Ceratotherium simum simum at the Ndumu Reserve [@conway_population_1989]. Ndumu is located at the Mozambique coastal plan. Its size is about $116~km^2$.  The population was established in 1961-1963 by introducing 20 individuals.  
 Since rhinoceroses prefer dense woodland and thickets in the Ndumu Reserve, they are difficult to observe. Thus demographic data are scarce. The report of @conway_population_1989 contains the following information:
 
@@ -1113,7 +1121,7 @@ pva.plot(N, time=years, xlab="years", title=title)
 ### Rhino 5. Additional poaching mortality
 One more bit of reality to the model – It is estimated that there is additional mortality from illegal poaching in the park at a rate of 2 \% of the population per year on average. We will also incorporate this as a probability in the same way that we dealt with birth and death rates.
 
-**TASK:** Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
+__TASK:__ Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
 
 (Hint: as with `Pb` and `Pd`, you will need to create a vector of length `N[t-1]` with random uniformly-distributed numbers and use this to calculate the number of poached individuals. This will become an additional source of mortality in the calculation of `N[t]`)
 
@@ -1660,7 +1668,7 @@ Again, a vector is used to hold the number of individuals within a size/stage cl
 
 
 ## Case Study: Loggerhead turtle stage-based matrix model
-```{r, echo=FALSE, fig.align="center", fig.cap="A loggerhead caught by a longline. Credit: scienceblogs.com"}
+```{r, echo=FALSE, fig.align="center", fig.cap="A loggerhead caught by a longline. Credit: scienceblogs.com", dpi=50}
 knitr::include_graphics("figures/c_caretta.jpg")
 ```
 
@@ -1754,7 +1762,198 @@ __TASK:__
 
 Explore the elasticity of transition values of the matrix ($p_x$, $g_x$) and the reproductive values ($f_x$) of each class. What do the results tell us about where conservation efforts should be focused?
 
+\newpage
 
+# Management Strategy Evaluation
+
+Management Strategy Evaluation (**MSE**) is a simulation framework that allows for the comparison of the relative effectiveness for achieving management objectives of different combinations of data collection schemes, methods of analysis and subsequent processes leading to management actions [@punt_management_2016]. There are many "flavors" of MSE, but "best practices" dictate that the framework should be used to identify of management strategies that are robust to uncertainty rather than strategies that are optimal for a particular scenario.
+
+MSE consists of two main processes that feedback to each other; 1. the "operating model" (**OM**), which is used to simulate the "true" system of resource dynamics, including both the fishery and the biological processes, and 2. the management strategy or procedure (**MP**), which is used to simulate the process of management, including data analysis and application of a decision process (e.g harvest control rule). 
+
+In the **OM**, management decisions are translated into action (e.g. Total Allowable Catch, TAC) within the implementation model. This is the first possible source of uncertainty, which can be in the form of a mismatch between advised management and implemented action. 
+Once implemented, the OM simulated the interaction of the resource and the resource use (e.g. Biological and fishery model). Again uncertainty can enter in to this step through variability in many parameters and rates (e.g. selectivity, mortality rates), rather than holding these constant through time.
+Then is the Data generation step, which provides the observations that will be used by the MP. These can be e.g. catch data, scientific survey data, etc. Again, uncertainty can enter in here in many forms.
+
+In the **MP**, data is analysed according to (in the best cases) the same method used to estimate the state of the resource (e.g. a particular stock assessment model). 
+Uncertainty arises due to differences in the assessment model versus the OM, as well as poor estimation due to the underlying noise in the data. 
+This perceived state of the resource forms the basis of management decisions, e.g. via a harvest control rule (HCR), which in turn feed back into the OM.
+The performance of a given MP can be evaluated using any citeria agreed upon. For example, ICES requires that a given MP is able to maintain a stock's biomass above a given reference point, below which the stock's productivity may be impared. For example, the spawning stock biomass (SSB) associated with the last above-average recruitment ($B_{lim} = 107,000$). If a given HCR does not maintain the SSB above Blim with a probabilty of 95\%, then it is not considered precautionary.  
+
+
+```{r, echo=FALSE, fig.align="center", fig.cap = "Conceptual overview of the management strategy evaluation modelling process (from Punt et al. 2016).", dpi=150}
+knitr::include_graphics("figures/Punt_etal_fig1.png")
+```
+
+
+## Case Study: A simple MSE
+
+In the following case study, we will simulate a population using a simple logistic-type growth function with Allee effect. The example uses a simplified MP where there is not true assessment model applied, but simply an observed estimate of the population with error. Additional uncertainty is introduced via the implementation of the harvest control rule. Additional variation is introduced in the variation of $K$ an $r$.
+
+
+### Required functions
+```{r}
+# logistic growth function
+logisticAllee <- function(r = NULL, K = NULL, a = 0, B = NULL){
+  if(is.null(r) | is.null(K) | is.null(B)){stop("Must define 'r', 'K' and 'B'")}
+  dBdt <- r*B*(1-(B/K))*((B-a)/K)
+  B2 <- B + dBdt
+  return(B2)
+}
+
+# harvest control rule function
+hcr <- function(B, Btrig = 300, Ftarg = 0.1){
+  Fadv <- ifelse(B < Btrig, 0 + (Ftarg/Btrig)*B, Ftarg)
+  Y <- B * Fadv
+  return(list(Fadv=Fadv, Y=Y))
+}
+
+# Management Strategy Evaluation function
+mse <- function(
+  K = 1000, # carrying capacity
+  r = 0.2, # growth constant
+  a = 0, # Allee effect term
+  nyear = 1000, # number of years to simulate
+  Btrig = 400, # hcr population size limit
+  Ftarg = 0.13, # hcr target fishing mortality 
+  B1 = 500, # inital population size
+  assess_err = 0.2,# assessment error (cv)
+  imp_err = 0.1, # yield implimentation error (cv)
+  r_var = 0.2, # variation in r (cv)
+  K_var = 0.1 # variation in K (cv)
+){
+  # make empty results object
+  df <- data.frame(
+    Breal = seq(nyear)*NaN, Bobs = NaN, dBdt = NaN,
+    Freal = NaN, Fadv = NaN, 
+    Yreal = NaN, Yadv = NaN)
+  
+  # intialize population
+  df$Breal[1] <- B1
+  
+  # run MSE through all years
+  for(i in seq(nyear)){
+    ### Management Procedure (MP)
+    df$Bobs[i] <- df$Breal[i] * rlnorm(1, sdlog = assess_err) # observe stock 
+    adv <- hcr(B = df$Bobs[i], Btrig = Btrig, Ftarg = Ftarg) # call to HCR
+    df$Fadv[i] <- adv$Fadv # record F advice
+    df$Yadv[i] <- adv$Y # record yield advice
+    df$Yreal[i] <- df$Yadv[i] * rlnorm(1, sdlog = imp_err) # realized yield
+    df$Freal[i] <- df$Yreal[i] / df$Breal[i] # realized F
+    ### Operating Model (OM)
+    B2 <- logisticAllee(B = df$Breal[i] - df$Yreal[i], # grow stock
+      r = r * rlnorm(1, sdlog = r_var), K = K * rlnorm(1, sdlog = K_var),
+      a = a)
+    df$dBdt[i] <- B2-(df$Breal[i]-df$Yreal[i]) # record production
+    if(i != nyear){ # record new pop state (if not last year)
+      df$Breal[i+1] <- B2
+    }
+  }
+  return(df)
+}
+
+# plot results of mse function
+mseplot <- function(df, 
+  ptcol = adjustcolor(1,0.2), linecol = 4, pch = 16){
+  op <- par(mfrow = c(2,2), mar = c(4,4,1,1), mgp = c(2,0.5,0))
+  # plot 1
+  plot(df$Bobs, t = "l", col = ptcol)
+  lines(df$Breal, col = linecol, lty = 1)
+  legend("top", legend = c("Bobs", "Breal"), ncol=2, bty = "n", 
+    lty=1, col = c(ptcol, linecol))
+  # plot 2
+  plot(dBdt ~ Breal, df, pch = pch, col = ptcol)
+  fit <- lm(dBdt ~ -1 + poly(Breal, degree = 2, raw = TRUE), df)
+  newdf <- data.frame(Breal=seq(0, max(df$Breal), len = 100))
+  newdf$dBdt <- predict(fit, newdata = newdf)
+  lines(dBdt ~ Breal, newdf, col = linecol, lty = 2)
+  cs <- coef(fit)
+  legend("bottom", 
+    legend = c(paste("Bmsy =", round(-cs[1]/(2*cs[2]))), 
+      paste("K =", round(-cs[1]/cs[2]))),
+    bty = "n", ncol = 2)
+  # plot 3
+  plot(Breal ~ Bobs, df, log = "xy", pch = pch, col = ptcol)
+  abline(0,1, lty = 2, col = linecol)
+  # plot 4
+  plot(Freal ~ Fadv, df, log = "xy", pch = pch, col = ptcol)
+  abline(0,1, lty = 2, col = linecol)
+  par(op)
+}
+
+# probability calculation function
+pcalc <- function(B, Blim = 200){
+  # annual probability of B < Blim
+  annP <- apply(B, 1, function(x){mean(x < Blim)})
+  # mean annual prob. of being below Blim
+  P1 <- mean(annP) 
+  # prob. of being below Blim once
+  P2 <- mean(apply(B, 2, function(x){max(x < Blim)})) 
+  # max. annual prob. of being below Blim
+  P3 <- max(annP) # max. annual prob. of being below Blim
+  return(list(P1 = P1, P2 = P2, P3 = P3))
+}
+```
+
+### Harvest Control Rule (HCR)
+
+We will use a harvest control rule that is commonly used, which applies a given fishing mortality resulting in maximum sustainable yield ($Fmsy$) when the stock is in good condition. When the stock is below a given threshold ($Btrigger$), fishing mortality is reduced linearly. Such an approach is commonly applied to longer-lived species in order to result is a given age-structure to the population, but here we will be simulating simply biomass, as in a surplus production model. 
+
+```{r, fig.height=3}
+res <- hcr(B=1:1000, Btrig = 450, Ftarg = 0.15)
+op <- par(mfrow = c(1,2), mgp=c(2,0.5,0), mar = c(3,3,1,1))
+plot(1:1000, res$Fadv, t="l", xlab = "B", ylab = "Fadv")
+plot(1:1000, res$Y, t="l", xlab = "B", ylab = "Y")
+par(op)
+```
+
+
+### MSE assumptions
+
+Our imaginary population has the following growth parameters and HCR settings:
+
+| Parameter | Description | Value |
+|:------|:---------|---------:|
+| `K` | Carrying capacity | 1000 |
+| `r` | Growth rate | 0.2 |
+| `a` | Allee effect | -1000 |
+| `B1` | Starting population size | 1000 |
+| `Btrig` | Biomass trigger to scale down fishing mortality | 450 |
+| `Blim` | Biomass limit below which population is at risk | 350 |
+| `Ftarg` | Target value for fishing mortality | 450 |
+
+Using these settings, we can first run the MSE without uncertainty and growth variability to observe the behavior of the OM and MP:
+
+```{r}
+# demo without error or variation
+df <- mse(K = 1000, r = 0.2, a = -1000, nyear = 200, 
+  Btrig = 450, Ftarg = 0.15, B1 = 1000, 
+  assess_err = 0, imp_err = 0, r_var = 0, K_var = 0)
+mseplot(df)
+```
+
+The observed and predicted biomass are equivalent (bottom-left panel), as is the advise fishing mortality (Fadv) versus the realized fishing mortality (bottom-right). The reference line in the top-righ panel is just to show how the logistic growth with Allee effect OM differs from the standard logistic growth model. This discrepancy could be included in the MSE as model uncertainty, but is left out here. 
+
+The next run demonstrates the effect of including uncertainty:
+
+| Parameter | Description | Value |
+|:------|:---------|---------:|
+| `assess_err` | Assessment error | 0.1 |
+| `imp_err` | Implementation error | 0.05 |
+| `r_var` | Variation in growth rate (CV) | 0.1 |
+| `K_var` | Variation in carrying capacity (CV) | 0.05 |
+
+```{r}
+# demo with error and variation
+df <- mse(K = 1000, r = 0.2, a = -1000, nyear = 200,
+  Btrig = 450, Ftarg = 0.15, B1 = 1000, 
+  assess_err = 0.1, imp_err = 0.05, r_var = 0.1, K_var = 0.05)
+mseplot(df)
+```
+
+
+__TASK 1:__ Set up an loop to run the above MSE with uncertainty for 100 runs, and record the true biomass (`Breal`) from each run in a matrix (years (rows) by runs (cols)). Calculate the number of runs that dropped below the biomass threshold of 350 (i.e. `Blim`) during the last 20 years of the simulation.
+
+__TASK 2:__ Try different combinations of `Btrig` and `Ftarg`. Record the probability of dropping below `Blim` and the mean yield. Try and identify the combination resulting in the highest mean yield while having a risk lower than 5\%.
 
 \newpage
 
@@ -1889,3 +2088,6 @@ pva.plot(Nmulti, quasi.ext=20, title=title)
 \newpage
 
 # References
+
+
+

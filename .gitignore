@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 working
+ModConsBiol_handbook_files
+ModConsBiol_handbook_cache
+*.png
