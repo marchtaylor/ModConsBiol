@@ -591,7 +591,7 @@ Reading tables into R results in automatic classification as a `data.frame`. Dat
 ## Plotting
 ###	The basics
 
-The `plot()` accepts different combinations of input arguments. If y is a vector, `plot(y)` produces a piecewise linear graph of the elements of `y` versus the index of the elements of `y`. 
+The `plot()` accepts different combinations of input arguments. If y is a vector, `plot(y)` produces a piece-wise linear graph of the elements of `y` versus the index of the elements of `y`. 
 
 ```{r}
 y=c(1:10)
@@ -1291,7 +1291,7 @@ col=c(1:length(N0)))
 
 
 ## Direct evaluation of a matrix model
-Using a matrix for calculating age/class dynamics has an advantage in terms of calculation speed. Furthermore, for a square matrix, the matrix governs the behaviour of solutions to the corresponding system of linear equations. An *Eigen decomposition* of this matrix can reveal several aspects of the population (at equilibrium). The following sections outline how to extract the following information from a matrix model: 
+Using a matrix for calculating age/class dynamics has an advantage in terms of calculation speed. Furthermore, for a square matrix, the matrix governs the behavior of solutions to the corresponding system of linear equations. An *Eigen decomposition* of this matrix can reveal several aspects of the population (at equilibrium). The following sections outline how to extract the following information from a matrix model: 
 
 1. Rate of population growth
 2. Stable age/stage distribution
@@ -1634,7 +1634,7 @@ plot.growth(grd)
 
 
 
-**Task 2:** Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagramme (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
+**Task 2:** Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagram (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
 
 ```{r, echo=FALSE, fig.align="center"}
 knitr::include_graphics("figures/wolff_etal_ypr.png")
@@ -1655,7 +1655,7 @@ $$
 \end{bmatrix}
 $$
 
-This is an Usher matrix where the diagonal elements $p_x$ characterize the proportion of individuals in each stage who remain in that stage. The subdiagonal elements $g_x$ are, again, the transition rates, i.e. the proportion that graduates to the next stage per time step. Except for the first element, the top row specifies fecundities, $f_x$.
+This is an Usher matrix where the diagonal elements $p_x$ characterize the proportion of individuals in each stage who remain in that stage. The sub-diagonal elements $g_x$ are, again, the transition rates, i.e. the proportion that graduates to the next stage per time step. Except for the first element, the top row specifies fecundities, $f_x$.
 
 
 $$
@@ -1731,7 +1731,7 @@ $$
 $$
 
 
-The resulting Ushher matrix contained the following values:
+The resulting Usher matrix contained the following values:
 
 ```{r, echo=FALSE, eval=TRUE, results = 'as.is'}
 U = matrix(c(0,0.6747,0,0,0,0,0,0,0.7370,0.0486,0,0,0,0,0,0,0.6610,0.0147,0,0,0,0,0,0,0.6907,0.0518,0,0,127,0,0,0,0,0.8091,0,4,0,0,0,0,0,0.8091,80,0,0,0,0,0,0.8089), nrow=7, ncol=7)
@@ -1777,7 +1777,7 @@ Then is the Data generation step, which provides the observations that will be u
 In the **MP**, data is analysed according to (in the best cases) the same method used to estimate the state of the resource (e.g. a particular stock assessment model). 
 Uncertainty arises due to differences in the assessment model versus the OM, as well as poor estimation due to the underlying noise in the data. 
 This perceived state of the resource forms the basis of management decisions, e.g. via a harvest control rule (HCR), which in turn feed back into the OM.
-The performance of a given MP can be evaluated using any citeria agreed upon. For example, ICES requires that a given MP is able to maintain a stock's biomass above a given reference point, below which the stock's productivity may be impared. For example, the spawning stock biomass (SSB) associated with the last above-average recruitment ($B_{lim} = 107,000$). If a given HCR does not maintain the SSB above Blim with a probabilty of 95\%, then it is not considered precautionary.  
+The performance of a given MP can be evaluated using any criteria agreed upon. For example, ICES requires that a given MP is able to maintain a stock's biomass above a given reference point, below which the stock's productivity may be impaired. For example, the spawning stock biomass (SSB) associated with the last above-average recruitment ($B_{lim} = 107,000$). If a given HCR does not maintain the SSB above Blim with a probability of 95\%, then it is not considered precautionary.  
 
 
 ```{r, echo=FALSE, fig.align="center", fig.cap = "Conceptual overview of the management strategy evaluation modelling process (from Punt et al. 2016).", dpi=150}
@@ -1919,7 +1919,7 @@ Our imaginary population has the following growth parameters and HCR settings:
 | `B1` | Starting population size | 1000 |
 | `Btrig` | Biomass trigger to scale down fishing mortality | 450 |
 | `Blim` | Biomass limit below which population is at risk | 350 |
-| `Ftarg` | Target value for fishing mortality | 450 |
+| `Ftarg` | Target value for fishing mortality | 0.15 |
 
 Using these settings, we can first run the MSE without uncertainty and growth variability to observe the behavior of the OM and MP:
 
@@ -1931,7 +1931,7 @@ df <- mse(K = 1000, r = 0.2, a = -1000, nyear = 200,
 mseplot(df)
 ```
 
-The observed and predicted biomass are equivalent (bottom-left panel), as is the advise fishing mortality (Fadv) versus the realized fishing mortality (bottom-right). The reference line in the top-righ panel is just to show how the logistic growth with Allee effect OM differs from the standard logistic growth model. This discrepancy could be included in the MSE as model uncertainty, but is left out here. 
+The observed and predicted biomass are equivalent (bottom-left panel), as is the advise fishing mortality (Fadv) versus the realized fishing mortality (bottom-right). The reference line in the top-right panel is just to show how the logistic growth with Allee effect OM differs from the standard logistic growth model. This discrepancy could be included in the MSE as model uncertainty, but is left out here. 
 
 The next run demonstrates the effect of including uncertainty:
 
@@ -1961,7 +1961,7 @@ __TASK 2:__ Try different combinations of `Btrig` and `Ftarg`. Record the probab
 
 ## Metapopulation 1: single simulation
 
-This is just a generic example of a metapopulation consisting of 7 populations. The seven populations are located close to each other forming a compact system. Dispersal (in both directions) can occur between a population and its three nearest neighbours, except for the population in the middle, which exchanges migrants from all other populations [from @burgman_risk_1993]. 
+This is just a generic example of a metapopulation consisting of 7 populations. The seven populations are located close to each other forming a compact system. Dispersal (in both directions) can occur between a population and its three nearest neighbors, except for the population in the middle, which exchanges migrants from all other populations [from @burgman_risk_1993]. 
 
 ```{r, echo=FALSE, fig.align="center", fig.cap = "Spatial pattern of the example metapopulation"}
 knitr::include_graphics("figures/metapopulation.png")
