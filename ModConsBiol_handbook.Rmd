@@ -45,7 +45,7 @@ knitr::include_graphics("figures/Turtle_golfina_escobilla_oaxaca_mexico_claudio_
 
 # R Basics
 
-## Staring an R session
+## Starting an R session
 
 ### Using scripts
 A "Script" is a text window where coding can be written, manipulated and introduced to the Workspace (with ctrl Enter). These can be saved to the Directory folder as well. This will save time in the future when we have several lines of code to introduce. Within the script, we write all necessary commands. To make simulation experiments, we execute the script to run the model.
@@ -1570,7 +1570,7 @@ round(Re(eigen(L)$vectors[,1]) / sum(Re(eigen(L)$vectors[,1])), 3)
 ```
 
 
-**Task:** Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “growth” (`grd$growth`), for storing the resulting rate of population growth:
+**Task:** Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “lambda” (`grd$lambda`), for storing the resulting rate of population growth:
 
 ```{r}
 Fs <- seq(0, 1, length.out=11)
