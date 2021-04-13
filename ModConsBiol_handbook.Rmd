@@ -33,6 +33,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+
+
 \vspace{50pt}
 
 
@@ -724,6 +727,337 @@ CairoSVG("plot.svg", width = 6, height = 6)
 hist(x1, xlim=ran.x, breaks=levs, col="grey") # a histogram plot
 dev.off()
 ```
+
+
+# Statistical model building in R
+
+## Model formulation
+
+Most statistical models in R contain a formula argument. The formulation differs by model type, but similarities exist in the general formatting of response and predictor variables. For General Linear Models (LM) and Generalized Linear Models (GLM), the following section outlines the main rules for defining formulas. Many other model types use the basic language of these formulas, so understanding their 
+
+[From R Help: `?formula`] – "The models fit by, e.g., the `lm` and `glm` functions are specified in a compact symbolic form. The ~ operator is basic in the formation of such models. An expression of the form `y ~` model is interpreted as a specification that the response y is modeled by a linear predictor specified symbolically by model. Such a model consists of a series of terms separated by `+` operators. The terms themselves consist of variable and factor names separated by `:` operators. Such a term is interpreted as the interaction of all the variables and factors appearing in the term.
+
+"In addition to + and :, a number of other operators are useful in model formulae. The * operator denotes factor crossing: `a*b` interpreted as `a+b+a:b`. The `^` operator indicates crossing to the specified degree. For example `(a+b+c)^2` is identical to `(a+b+c)*(a+b+c)` which in turn expands to a formula containing the main effects for `a`, `b` and `c` together with their second-order interactions. The `%in%` operator indicates that the terms on its left are nested within those on the right. For example `a + b %in% a` expands to the formula `a + a:b`. The - operator removes the specified terms, so that `(a+b+c)^2 - a:b` is identical to `a + b + c + b:c + a:c`. It can also be used to remove the intercept term: when fitting a linear model `y ~ x - 1` specifies a line through the origin. A model with no intercept can be also specified as `y ~ x + 0` or `y ~ 0 + x`.
+
+"While formulae usually involve just variable and factor names, they can also involve arithmetic expressions. The formula `log(y) ~ a + log(x)` is quite legal. When such arithmetic expressions involve operators which are also used symbolically in model formulae, there can be confusion between arithmetic and symbolic operator use.
+
+"To avoid this confusion, the function `I()` can be used to bracket those portions of a model formula where the operators are used in their arithmetic sense. For example, in the formula `y ~ a + I(b+c)`, the term `b+c` is to be interpreted as the sum of `b` and `c`."
+
+**Examples:**
+```{r include=FALSE}
+# "~" denotes response variable to the left, "+" separates terms
+fmla <- formula(y ~ a+b)
+attr(terms(fmla), "term.labels")
+# [1] "a" "b"
+
+# ":" denotes interaction
+fmla <- formula(y ~ a:b + c)
+attr(terms(fmla), "term.labels")
+# [1] "c"   "a:b"
+
+# "*" denotes single terms plus all orders of interaction
+fmla <- formula(y ~ a*b)
+attr(terms(fmla), "term.labels")
+# [1] "a"   "b"   "a:b"
+
+fmla <- formula(y ~ a*b*c) # All terms plus interaction
+attr(terms(fmla), "term.labels")
+# [1] "a"     "b"     "c"     "a:b"   "a:c"   "b:c"   "a:b:c"
+
+#"^" denotes order upper level for interactions conbinations
+fmla <- formula(y ~ (a+b+c)^2) #second-order interactions
+attr(terms(fmla), "term.labels")
+# [1] "a"   "b"   "c"   "a:b" "a:c" "b:c"
+
+fmla <- formula(y ~ (a+b+c)^3) #third-order interactions
+attr(terms(fmla), "term.labels")
+# [1] "a"     "b"     "c"     "a:b"   "a:c"   "b:c"   "a:b:c"
+
+# "-" denotes term removal
+fmla <- formula(y ~ (a+b+c)^3 - a:b:c) #third-order interactions
+attr(terms(fmla), "term.labels")
+# [1] "a"   "b"   "c"   "a:b" "a:c" "b:c"
+
+# "I()" denotes arithmatic use of operators
+fmla <- formula(y ~ a+I(b^3)) #third-order interactions
+attr(terms(fmla), "term.labels")
+# [1] "a"      "I(b^3)"
+
+# "1" denotes the intercept term. It is automatically included unless specified
+# with intercept
+fmla <- formula(y ~ a+b + 1) # with intercept
+attr(terms(fmla), "term.labels"); attr(terms(fmla), "intercept")
+# [1] "a" "b"
+# [1] 1
+
+# minus intercept version 1
+fmla <- formula(y ~ a+b - 1)
+attr(terms(fmla), "term.labels"); attr(terms(fmla), "intercept")
+# [1] "a" "b"
+# [1] 0
+
+# minus intercept version 2
+fmla <- formula(y ~ a+b + 0)
+attr(terms(fmla), "term.labels"); attr(terms(fmla), "intercept")
+# [1] "a" "b"
+# [1] 0
+```
+
+
+**What does it all mean?**
+
+Let's try a visual example to show how this translates into model testing. The following example will look at a simple model that explores a model to predict petal length as a function of sepal length in the flower of two species of iris (data set: `iris`). We will start off with the "largest" possible model, which allows for independent linear regressions for each species (i.e. each relationship differs in terms of intercept and slope).
+
+```{r}
+df <- subset(iris, Species %in% c("setosa","versicolor"))
+df <- df[order(df$Petal.Length),]
+df$Species <- as.factor(as.character(df$Species))
+plot(Petal.Length ~ Sepal.Length, df, col = df$Species)
+legend("bottomright", legend = levels(df$Species), col = 1:2, pch = 1)
+
+fit <- lm(Petal.Length ~ Sepal.Length*Species, df)
+summary(fit)
+```
+
+The summary of the model is not so straightforward to interpret, but what it is showing are the coefficients associated with the intercept (`(intercept)`) and slope (`Sepal.Length`) of the *first* iris species (i.e. first level in the factor `Species`, "setosa"; `levels(df$Species)`). The regression of the second species (i.e. "versicolor") is based on additional modifications to this baseline model in terms of intercept and slope; i.e. the intercept of the *versicolor* model is `0.8031 - 0.6179 = 0.1852`, and its slope is `0.1316 + 0.5548 = 0.6864`. This can be better visualized by returning the predictions of the model.
+
+```{r}
+df$pred <- predict(fit)
+plot(Petal.Length ~ Sepal.Length, df, col = df$Species)
+legend("bottomright", legend = levels(df$Species), col = 1:2, pch = 1)
+lines(pred ~ Sepal.Length, data = subset(df, Species == "setosa"))
+lines(pred ~ Sepal.Length, data = subset(df, Species == "versicolor"), col = 2)
+```
+
+Now we can visualize some of the other model formulas in the same way. For the purpose of illustration, we will extend these predictions over a larger range of values in order to visualize the intercept. This will requires predicting onto a new data set (`newdata$pred <- predict(fit, newdata = newdata)`), but otherwise the procedure is similar.
+
+```{r}
+fmla0 <- "Petal.Length ~ Sepal.Length*Species"
+fmla1 <- "Petal.Length ~ Sepal.Length + Species"
+fmla2 <- "Petal.Length ~ Sepal.Length"
+fmla3 <- "Petal.Length ~ Species"
+fmla4 <- "Petal.Length ~ 1"
+fmlas <- c(fmla0, fmla1, fmla2, fmla3, fmla4)
+
+# new data, used for predicting over a larger range
+newdata <- expand.grid(
+  Sepal.Length = seq(0, max(df$Sepal.Length), length.out = 10), 
+  Species = unique(df$Species))
+
+op <- par(mfrow = c(3,2), mgp = c(2,0.5,0), ps = 8, mar = c(3,3,1.5,0.5))
+for(i in seq(fmlas)){
+  # fit and predict
+  fit <- lm(fmlas[[i]], df)
+  newdata$pred <- predict(fit, newdata = newdata)
+  # plot
+  plot(Petal.Length ~ Sepal.Length, df, col = df$Species, 
+    xlim = c(0, max(df$Sepal.Length)), ylim = c(0, max(df$Petal.Length)))
+  if(i == length(fmlas)) legend("topleft", legend = levels(df$Species), col = 1:2, pch = 1)
+  lines(pred ~ Sepal.Length, data = subset(newdata, Species == "setosa"))
+  lines(pred ~ Sepal.Length, data = subset(newdata, Species == "versicolor"), 
+    col = 2, lty = 2)
+  mtext(fmlas[[i]], side = 3, line = 0.25, adj = 0)
+}
+par(op)
+
+```
+
+You should see that the models become simpler as one moves towards the bottom plots, where the relationship in both species may only differ in terms of one of the terms, or not at all.
+
+Choosing the best model for a given situation can be difficult if you have many possible options, but, hopefully, hypothesis-driven explorations will help you limit your explorations to a manageable amount. Below is an introduction into some aspects of model selection
+
+
+
+
+## A strategy for model selection
+
+A large part of model building is selecting the best model to describe the response variable. An important concept to remember when looking for the "best" model is whether the addition of terms improves the predictive power of the model. Generally, the more explanatory variables that one has, the more variation will be explained in the response variable, but one has to be careful not to include variables that do not explain a *significant* portion of the variation. The inclusion of these terms might help you achieve a higher $R^2$ value for your specific data set, but are likely to be a poor predictor of new data that was not seen during the fitting. This problem is referred to as "*over-fitting*".
+
+The strategy presented here relies on the comparison of "*nested models*" in determining whether a term should be kept or not. Nested models differ by a single term, whereby the larger model contains all of the terms of the smaller model, plus an additional one. One commonly used strategy, is to start with your most complex model (e.g. the model above that included species, petal length, and their interaction) and work backwards trying to remove variables that are not significant. 
+
+As a general rule, one should start by removing higher-order terms first (e.g. interaction terms) before moving on main terms or lower-level nested terms. Furthermore, some believe that there is a general rule stating that the main term should always be included if the term is also used in an interaction (see discussion here: <http://stats.stackexchange.com/q/11009/10675>)
+
+This logic is within the automated stepwise search routine found in the function `step()` (introduced below). This usually makes sense, however it is definitely not a rule and a basic guideline might be to simply think about which models are plausible given your specific question, and treat the inclusion of terms as hypotheses to be tested (see discussion here: <http://stats.stackexchange.com/q/4901/10675>). 
+
+> **\textcolor{blue}{TASK:}** Some of the above models for sepal length show a negative prediction at small petal lengths. Is there another, more realistic, model that might be fit?
+
+
+### ANOVA, F-test
+
+Most biologists may have surely come across Analysis of Variance (ANOVA), used for testing the difference in mean values for 2 or more groups; e.g. in evaluating whether a given treatment has has a significant effect on some response variable. Whether you noticed it or not, one can think of this in terms of linear models and the testing of whether the "effect" term should be included and helps to explain a significant degree of variation. Again we will use the `iris` data set for this illustration, and will compare whether sepal length differs among three species of iris.
+
+In the vein of nested model testing, the "large" model will be one that contains the "Species" term, while the "small" one will not. First, let's fit both models and visualize the results:
+
+```{r}
+# large model
+# "1" included for consistency, but intercept inclusion is by default
+fitL <- lm(Sepal.Length ~ 1 + Species, data = iris)
+
+# small model
+fitS <- lm(Sepal.Length ~ 1, data = iris)
+
+# plot
+COL <- rainbow(3)
+COLtrans <- adjustcolor(COL, 0.2)
+boxplot(Sepal.Length ~ Species, data = iris, col = COLtrans, border = 1)
+abline(h = fitS$coeff[1], lwd=3, lty=2, col=8)
+abline(h = fitL$coeff[1], col=COL[1], lwd=3, lty=2)
+abline(h = fitL$coeff[1]+fitL$coeff[2], col=COL[2], lwd=3, lty=2)
+abline(h = fitL$coeff[1]+fitL$coeff[3], col=COL[3], lwd=3, lty=2)
+```
+
+From a first glance, it would certainly look like there is a significant difference in sepal length among the iris species, but we can test this explicitly by comparing the nested models via `anova()`. Indeed, the test shows a highly significant effect according to the p-value:
+
+```{r}
+anova(fitS, fitL)
+```
+
+What this test is doing is testing whether the improvement in residual error by the large model is sufficiently large given the increased degrees of freedom. For comparison, here is a manual calculation of the F-test:
+
+```{r}
+# analysis of residual sum of squares of lm() fitted models
+arss <- function(small.model, big.model){
+  F.value <-((sum(resid(small.model)^2) - sum(resid(big.model)^2)) / 
+    (summary(big.model)$df[1]-summary(small.model)$df[1])) / 
+    (sum(resid(big.model)^2)/(summary(big.model)$df[2]))
+  P.value <- pf(F.value, (summary(big.model)$df[1]-summary(small.model)$df[1]), 
+    summary(big.model)$df[2], lower.tail = FALSE)
+  return(list(F.value = F.value, P.value = P.value))
+}
+
+arss(small.model = fitS, big.model = fitL) 
+```
+
+**A larger example (polynomial fitting)**
+
+In the following example, we have three nested models; linear, quadratic, and cubic polynomials. Using `anova()`, see if you can arrive to the best model by eliminating insignificant terms.  
+
+```{r}
+df <- structure(list(x = c(233, 286, 386, 554, 201, 549, 572, 430, 
+415, 131, 203, 188, 444, 292, 485, 349, 459, 596, 290, 489), 
+    y = c(219, 222, 235, 213, 193, 257, 254, 274, 269, 136, 190, 
+    178, 258, 177, 272, 236, 255, 221, 206, 268)), .Names = c("x", 
+"y"), row.names = c(NA, -20L), class = "data.frame")
+
+# compare polynomial fits of increasing degree
+lm1 = lm(y ~ x, data=df)
+lm2 = lm(y ~ x + I(x^2), data=df)
+lm3 = lm(y ~ x + I(x^2) + I(x^3), data=df)
+
+newdata <- data.frame(x=seq(min(df$x),max(df$x),length.out=100))
+plot(y ~ x, df)
+lines(newdata$x, predict(lm1, newdata), col=2)
+lines(newdata$x, predict(lm2, newdata), col=3)
+lines(newdata$x, predict(lm3, newdata), col=4)
+legend("topleft", legend=c("linear", "quadratic", "cubic"), col=2:4, lty=1, 
+  title="polynomial type")
+```
+
+### Akaike Information Criterion (AIC) and stepwise search
+
+If you are in a situation where you are unable to reduce the number of possible explanatory variables to a manageable number, you may need other strategies to compare model performance. The Akaike Information Criterion (AIC) is an alternative that can be used when comparing several models or similar structure (not appropriate to compare models with different underlying formulation; e.g. glm vs glmm). The AIC is a measure of the relative quality of a statistical model, and thus can be used to for model selection. AIC should be minimized in the best model, as it also infers a penalty depending on the degrees of freedom. It is important to emphasis that AIC is a relative measure of fit, and not a measure of significance, such as the F-test outlined above. However, a general rule of thumb is that a decrease in AIC of <2 will usually signify a significant improvement.
+
+```{r}
+AIC(lm3, lm2)
+```
+
+The `step()` function does an automated search for the best candidate LM/GLM model through comparison of nested models using AIC. The search can be specified as one of "both", "backward", or "forward", with a default of "both". Furthermore, interaction terms are only included if the main interaction is also included. Generally, a stepwise search can be helpful in looking for the combination of terms that produces the lowest AIC; however, it is possible that the algorithm does not find the best model since not all term combinations may be fit. 
+
+A (ridiculously) complex model for predicting sepal length in the iris data set would be to include all other morphometric data and the species factor. One shortcut to this formulation is to use `~ .` as a way to include all variables besides the response variable. If we want the interaction terms as well, we would raise this term to the desired maximum degree of interaction. In the following example, we will start with this complex model and try to reduce it to a smaller, but more robust set of terms. 
+
+```{r include=FALSE}
+# full model, up to a 4-degree interaction term
+fit0 <- lm(Sepal.Length ~ (.)^4, data = iris) 
+summary(fit0)
+
+# the stepwise search
+fit1 <- step(fit0, direction = "both")
+
+# possible further manual removal
+fit2 <- update(fit1, .~.-Petal.Width:Species)
+```
+
+
+
+### Things we have not dealt with
+
+The above examples were for relatively simple univariate linear models, which may not be appropriate for your data. The objective was not to introduce you all possible models, but rather to familiarize you with the language of formulating statistical models and simple hypothesis testing. Other aspects that you may need to consider are whether the relationships are better defined by non-linear functions (e.g. Generalized Additive Models, GAMs), dealing with non-normally distributed data (see `?family`, for use in e.g `gam` and `glm`), comparing model performance between non-nested models (e.g. via cross validation), identifying violations in residual patterns (e.g. heteroscedasticity), and many other topics. Hopefully, by reading related literature, and seeing examples for methods employed, you will be able to expand your R-literacy to meet the needs of your specific problem. 
+
+
+
+## Non-linear model fitting
+
+### Nonlinear Least Squares
+
+You will be dealing with nonlinear models later in the course. Conntrary to linear models, whose coefficients can be estimated directly, nonlinear model cofficients must be estimates iteratively, using numerical optimization algorithms to determine the best-fitting parameters. The most common is nonlinear least squares, which comes comes with the base installation of R (`nls()`). This function uses a [https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm](Gauss-Newton algorithm) by default, but there are other methods available. In the following example, we will be fitting a length-weight relationship (*power function*), and  
+
+```{r}
+# generate data
+set.seed(1)
+n <- 200
+linf <- 60
+k <- 0.2
+t0 <- -0.1
+age <- round(runif(n, min = 1, max = 10))
+length <- linf*(1-exp(-k*(age-t0))) * rlnorm(n, sdlog = 0.1)
+df <- data.frame(age = age, length = length)
+plot(length ~ age, df, xlim = c(0, max(df$age)), ylim = c(0, max(df$length)))
+
+vbgf <- function(linf, k, t, t0){linf * (1 - exp(-(k * (t - t0))))}
+
+fit <- nls(length ~ vbgf(linf, k, t0, t = age), data = df,
+  start = list(linf = 70, k = 0.1, t0 = -0.5), 
+  lower = list(linf = 40, k = 0.01, t0 = -1), 
+  upper = list(linf = 100, k = 1, t0 = 1), algorithm = "port")
+sol <- summary(fit)$coef[,1]
+
+df$pred <- predict(fit)
+newdat = data.frame(age = seq(0, max(df$age), length.out = 100))
+newdat$length <- vbgf(linf = sol["linf"], k = sol["k"], t0 = sol["t0"], 
+  t = newdat$age)
+grid()
+lines(length ~ age, newdat, col = 4)
+text(min(df$age), max(df$length)*0.9, pos = 4, col = 4,
+  labels = paste0("SS = ", round(sum((df$pred-df$length)^2))))
+text(8, 10, col = 4,
+  labels = paste0(names(sol), " = ", round(sol, 2), collapse = "\n"))
+
+```
+
+## Genetic algorithm
+
+```{r}
+library(GA)
+plot(length ~ age, df, xlim = c(0, max(df$age)), ylim = c(0, max(df$length)))
+
+fitness <- function(par = c(linf, k, t0), data = df){
+  pred <- vbgf(linf= par[1], k = par[2], t0 = par[3], t = data$age)
+  SS <- sum((data$length - pred)^2, na.rm = T)
+  return(-SS) # sign flip since we are trying to maximize fitness 
+}
+
+fit <- ga(type = "real-valued", fitness = fitness, 
+  data = df, 
+  lower = c(linf = 40, k = 0.01, t0 = -1), 
+  upper = c(linf = 100, k = 1, t0 = 1), 
+  popSize = 50, maxiter = 200,
+  monitor = F, seed = 1111)
+sol <- fit@solution
+
+df$pred <- vbgf(linf = sol[1], k = sol[2], t0 = sol[3], t = df$age)
+newdat = data.frame(age = seq(0, max(df$age), length.out = 100))
+newdat$length <- vbgf(linf = sol[,"linf"], k = sol[,"k"], t0 = sol[,"t0"], 
+  t = newdat$age)
+grid()
+lines(length ~ age, newdat, col = 4)
+text(min(df$age), max(df$length)*0.9, pos = 4, col = 4,
+  labels = paste0("SS = ", round(sum((df$pred-df$length)^2))))
+text(8, 10, col = 4,
+  labels = paste0(colnames(sol), " = ", round(sol, 2), collapse = "\n"))
+# plot(fit)
+```
+
+
 
 
 \newpage
