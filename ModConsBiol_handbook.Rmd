@@ -4,9 +4,9 @@ subtitle: "Practical handbook and case study examples using R"
 author: 
   - Marc H. Taylor^[Thuenen Institute of Sea Fisheries, Bremerhaven, Germany]
 date: "`r Sys.Date()`"
-# header-includes:
-#   \usepackage{caption}
-#   \usepackage{float}
+header-includes:
+  \usepackage{caption}
+  \usepackage{float}
 output: 
   # rmarkdown::html_document:
   #   fig_caption: yes
@@ -28,8 +28,8 @@ bibliography: refs.bib
 knitr::opts_chunk$set(
   echo = TRUE,
   fig.width=6, fig.height=5,
-  cache=TRUE
-  # fig.pos = "H"
+  cache=TRUE,
+  fig.pos = "H"
 )
 ```
 
@@ -334,7 +334,7 @@ X
 ```
 
 \vspace{24pt}
-**TASK:** Create the 10x10 matrix called "R", which has sequential elements 4-400 (by 4) (Use `seq()` function):
+> **\textcolor{blue}{TASK:}**  Create the 10x10 matrix called "R", which has sequential elements 4-400 (by 4) (Use `seq()` function):
 
 ```{r, echo=FALSE}
 R <- matrix(seq(from = 4, to = 400, by = 4), nrow = 10, ncol = 10)
@@ -342,7 +342,7 @@ R
 ```
 
 
-**EXTRA TASK:** Can you also create the same matrix using " `:` " function?
+> **\textcolor{blue}{EXTRA TASK:}**  Can you also create the same matrix using " `:` " function?
 
 
 \vspace{24pt}
@@ -549,7 +549,7 @@ r # to view the resulting vector
 sum(r)
 ```
 
-**TASK:** Try repeating only the last 3 lines of code – the result will be different without resetting the seed value.
+> **\textcolor{blue}{TASK:}**  Try repeating only the last 3 lines of code – the result will be different without resetting the seed value.
 
 \vspace{24pt}
 
@@ -728,6 +728,7 @@ hist(x1, xlim=ran.x, breaks=levs, col="grey") # a histogram plot
 dev.off()
 ```
 
+\newpage
 
 # Statistical model building in R
 
@@ -739,12 +740,12 @@ Most statistical models in R contain a formula argument. The formulation differs
 
 "In addition to + and :, a number of other operators are useful in model formulae. The * operator denotes factor crossing: `a*b` interpreted as `a+b+a:b`. The `^` operator indicates crossing to the specified degree. For example `(a+b+c)^2` is identical to `(a+b+c)*(a+b+c)` which in turn expands to a formula containing the main effects for `a`, `b` and `c` together with their second-order interactions. The `%in%` operator indicates that the terms on its left are nested within those on the right. For example `a + b %in% a` expands to the formula `a + a:b`. The - operator removes the specified terms, so that `(a+b+c)^2 - a:b` is identical to `a + b + c + b:c + a:c`. It can also be used to remove the intercept term: when fitting a linear model `y ~ x - 1` specifies a line through the origin. A model with no intercept can be also specified as `y ~ x + 0` or `y ~ 0 + x`.
 
-"While formulae usually involve just variable and factor names, they can also involve arithmetic expressions. The formula `log(y) ~ a + log(x)` is quite legal. When such arithmetic expressions involve operators which are also used symbolically in model formulae, there can be confusion between arithmetic and symbolic operator use.
+"While formulae usually involve just variable and factor names, they can also involve arithmetic expressions. The formula `log(y) ~ a + log(x)` is quite legal. When such arithmetic expressions involve operators which are also used symbolically in model formulae, there can be confusion between arithmetic and symbolic operator use. 
 
 "To avoid this confusion, the function `I()` can be used to bracket those portions of a model formula where the operators are used in their arithmetic sense. For example, in the formula `y ~ a + I(b+c)`, the term `b+c` is to be interpreted as the sum of `b` and `c`."
 
 **Examples:**
-```{r include=FALSE}
+```{r eval=FALSE, include=TRUE}
 # "~" denotes response variable to the left, "+" separates terms
 fmla <- formula(y ~ a+b)
 attr(terms(fmla), "term.labels")
@@ -806,7 +807,7 @@ attr(terms(fmla), "term.labels"); attr(terms(fmla), "intercept")
 
 **What does it all mean?**
 
-Let's try a visual example to show how this translates into model testing. The following example will look at a simple model that explores a model to predict petal length as a function of sepal length in the flower of two species of iris (data set: `iris`). We will start off with the "largest" possible model, which allows for independent linear regressions for each species (i.e. each relationship differs in terms of intercept and slope).
+Let's try a visual example to show how this translates into model specification. The following example will look at a model that explores petal length as a function of sepal length in two species of iris (data set: `iris`). We will start off with the "largest" possible model, which allows for independent linear regressions for each species (i.e. each relationship differs in terms of both intercept and slope).
 
 ```{r}
 df <- subset(iris, Species %in% c("setosa","versicolor"))
@@ -819,7 +820,7 @@ fit <- lm(Petal.Length ~ Sepal.Length*Species, df)
 summary(fit)
 ```
 
-The summary of the model is not so straightforward to interpret, but what it is showing are the coefficients associated with the intercept (`(intercept)`) and slope (`Sepal.Length`) of the *first* iris species (i.e. first level in the factor `Species`, "setosa"; `levels(df$Species)`). The regression of the second species (i.e. "versicolor") is based on additional modifications to this baseline model in terms of intercept and slope; i.e. the intercept of the *versicolor* model is `0.8031 - 0.6179 = 0.1852`, and its slope is `0.1316 + 0.5548 = 0.6864`. This can be better visualized by returning the predictions of the model.
+The `summary` of the model is not so straightforward to interpret, but it is showing the coefficients associated with the intercept (`(intercept)`) and slope (`Sepal.Length`) of the *first* iris species (i.e. first level in the factor `Species`, "setosa"; `levels(df$Species)`). The regression of the second species (i.e. "versicolor") is based on additional modifications to this baseline model in terms of intercept and slope; i.e. the intercept of the *versicolor* model is `0.8031 - 0.6179 = 0.1852`, and its slope is `0.1316 + 0.5548 = 0.6864`. This can be better visualized by returning the predictions of the model.
 
 ```{r}
 df$pred <- predict(fit)
@@ -829,15 +830,15 @@ lines(pred ~ Sepal.Length, data = subset(df, Species == "setosa"))
 lines(pred ~ Sepal.Length, data = subset(df, Species == "versicolor"), col = 2)
 ```
 
-Now we can visualize some of the other model formulas in the same way. For the purpose of illustration, we will extend these predictions over a larger range of values in order to visualize the intercept. This will requires predicting onto a new data set (`newdata$pred <- predict(fit, newdata = newdata)`), but otherwise the procedure is similar.
+Now we will visualize some of the other possible model formulas in the same way. For the purpose of illustration, we will extend these predictions over a larger range of sepal length values in order to include the y-intercept (`newdata$pred <- predict(fit, newdata = newdata)`).
 
 ```{r}
-fmla0 <- "Petal.Length ~ Sepal.Length*Species"
-fmla1 <- "Petal.Length ~ Sepal.Length + Species"
-fmla2 <- "Petal.Length ~ Sepal.Length"
-fmla3 <- "Petal.Length ~ Species"
-fmla4 <- "Petal.Length ~ 1"
-fmlas <- c(fmla0, fmla1, fmla2, fmla3, fmla4)
+fmla1 <- "Petal.Length ~ Sepal.Length*Species"
+fmla2 <- "Petal.Length ~ Sepal.Length + Species"
+fmla3 <- "Petal.Length ~ Sepal.Length"
+fmla4 <- "Petal.Length ~ Species"
+fmla5 <- "Petal.Length ~ 1"
+fmlas <- c(fmla1, fmla2, fmla3, fmla4, fmla5)
 
 # new data, used for predicting over a larger range
 newdata <- expand.grid(
@@ -862,29 +863,27 @@ par(op)
 
 ```
 
-You should see that the models become simpler as one moves towards the bottom plots, where the relationship in both species may only differ in terms of one of the terms, or not at all.
+You should see that the models become somewhat simpler towards the bottom plots, where the relationship in both species may only differ in terms of one of the terms, or not at all.
 
-Choosing the best model for a given situation can be difficult if you have many possible options, but, hopefully, hypothesis-driven explorations will help you limit your explorations to a manageable amount. Below is an introduction into some aspects of model selection
-
-
+Choosing the best model for a given situation can be difficult if you have many possible options, but, hopefully, hypothesis-driven explorations will help you limit your explorations to a manageable amount. Below is an introduction into some aspects of model selection.
 
 
 ## A strategy for model selection
 
 A large part of model building is selecting the best model to describe the response variable. An important concept to remember when looking for the "best" model is whether the addition of terms improves the predictive power of the model. Generally, the more explanatory variables that one has, the more variation will be explained in the response variable, but one has to be careful not to include variables that do not explain a *significant* portion of the variation. The inclusion of these terms might help you achieve a higher $R^2$ value for your specific data set, but are likely to be a poor predictor of new data that was not seen during the fitting. This problem is referred to as "*over-fitting*".
 
-The strategy presented here relies on the comparison of "*nested models*" in determining whether a term should be kept or not. Nested models differ by a single term, whereby the larger model contains all of the terms of the smaller model, plus an additional one. One commonly used strategy, is to start with your most complex model (e.g. the model above that included species, petal length, and their interaction) and work backwards trying to remove variables that are not significant. 
+The strategy presented here relies on the comparison of "*nested models*" in determining whether a term should be kept or not. Nested models differ by a single term, whereby the larger model contains all of the terms of the smaller model, plus an additional one. One commonly used strategy, is to start with your most complex model (e.g. the model above that included species, petal length, and their interaction) and work backwards, trying to sequentially remove variables that are not significant. 
 
 As a general rule, one should start by removing higher-order terms first (e.g. interaction terms) before moving on main terms or lower-level nested terms. Furthermore, some believe that there is a general rule stating that the main term should always be included if the term is also used in an interaction (see discussion here: <http://stats.stackexchange.com/q/11009/10675>)
 
-This logic is within the automated stepwise search routine found in the function `step()` (introduced below). This usually makes sense, however it is definitely not a rule and a basic guideline might be to simply think about which models are plausible given your specific question, and treat the inclusion of terms as hypotheses to be tested (see discussion here: <http://stats.stackexchange.com/q/4901/10675>). 
+This logic is within the automated stepwise search routine found in the function `step()` (introduced below), which usually makes sense, however it is definitely not a hard and fast rule. A basic guideline might be to try and formulate models are plausible given your specific question, and treat the inclusion of terms as hypotheses to be tested (see discussion here: <http://stats.stackexchange.com/q/4901/10675>). 
 
 > **\textcolor{blue}{TASK:}** Some of the above models for sepal length show a negative prediction at small petal lengths. Is there another, more realistic, model that might be fit?
 
 
 ### ANOVA, F-test
 
-Most biologists may have surely come across Analysis of Variance (ANOVA), used for testing the difference in mean values for 2 or more groups; e.g. in evaluating whether a given treatment has has a significant effect on some response variable. Whether you noticed it or not, one can think of this in terms of linear models and the testing of whether the "effect" term should be included and helps to explain a significant degree of variation. Again we will use the `iris` data set for this illustration, and will compare whether sepal length differs among three species of iris.
+Most biologists may have surely come across Analysis of Variance (ANOVA), used for testing the difference in mean values for 2 or more groups; e.g. in evaluating whether a given treatment has has a significant effect on some response variable. Whether you noticed it or not, one can think of this in terms of linear models and the testing of whether the "effect" (factor) term should be included. Again we will use the `iris` data set for this illustration, and will compare whether sepal length differs among three species of iris.
 
 In the vein of nested model testing, the "large" model will be one that contains the "Species" term, while the "small" one will not. First, let's fit both models and visualize the results:
 
@@ -912,7 +911,7 @@ From a first glance, it would certainly look like there is a significant differe
 anova(fitS, fitL)
 ```
 
-What this test is doing is testing whether the improvement in residual error by the large model is sufficiently large given the increased degrees of freedom. For comparison, here is a manual calculation of the F-test:
+What this test is doing is testing whether the improvement in residual error by the large model is sufficiently large given its higher degrees of freedom. For comparison, here is a manual calculation of the F-test:
 
 ```{r}
 # analysis of residual sum of squares of lm() fitted models
@@ -930,7 +929,7 @@ arss(small.model = fitS, big.model = fitL)
 
 **A larger example (polynomial fitting)**
 
-In the following example, we have three nested models; linear, quadratic, and cubic polynomials. Using `anova()`, see if you can arrive to the best model by eliminating insignificant terms.  
+In the following example, we have four nested models - polynomials of increasing complexity.  
 
 ```{r}
 df <- structure(list(x = c(233, 286, 386, 554, 201, 549, 572, 430, 
@@ -943,29 +942,35 @@ df <- structure(list(x = c(233, 286, 386, 554, 201, 549, 572, 430,
 lm1 = lm(y ~ x, data=df)
 lm2 = lm(y ~ x + I(x^2), data=df)
 lm3 = lm(y ~ x + I(x^2) + I(x^3), data=df)
+lm4 = lm(y ~ x + I(x^2) + I(x^3) + I(x^4), data=df)
 
 newdata <- data.frame(x=seq(min(df$x),max(df$x),length.out=100))
 plot(y ~ x, df)
 lines(newdata$x, predict(lm1, newdata), col=2)
 lines(newdata$x, predict(lm2, newdata), col=3)
 lines(newdata$x, predict(lm3, newdata), col=4)
-legend("topleft", legend=c("linear", "quadratic", "cubic"), col=2:4, lty=1, 
+lines(newdata$x, predict(lm4, newdata), col=5)
+
+legend("topleft", legend=paste("deg.", 1:4), col=2:5, lty=1, 
   title="polynomial type")
 ```
 
+> **\textcolor{blue}{TASK:}** Using `anova()`, see if you can arrive to the best model by eliminating insignificant terms.
+
+
 ### Akaike Information Criterion (AIC) and stepwise search
 
-If you are in a situation where you are unable to reduce the number of possible explanatory variables to a manageable number, you may need other strategies to compare model performance. The Akaike Information Criterion (AIC) is an alternative that can be used when comparing several models or similar structure (not appropriate to compare models with different underlying formulation; e.g. glm vs glmm). The AIC is a measure of the relative quality of a statistical model, and thus can be used to for model selection. AIC should be minimized in the best model, as it also infers a penalty depending on the degrees of freedom. It is important to emphasis that AIC is a relative measure of fit, and not a measure of significance, such as the F-test outlined above. However, a general rule of thumb is that a decrease in AIC of <2 will usually signify a significant improvement.
+If you are in a situation where you are unable to reduce the number of possible explanatory variables to a manageable number, you may need other strategies to compare model performance. The Akaike Information Criterion (AIC) is a statistic that can be used when comparing several models of similar structure (not appropriate to compare models with different underlying formulation; e.g. glm vs glmm). The AIC is a measure of the relative quality of a statistical model, and thus can be used to for model selection. AIC should be smallest in the best model, as it also infers a penalty depending on the degrees of freedom. It is important to emphasize that AIC is a relative measure of fit, and not a measure of significance, such as the F-test outlined above. However, a general rule of thumb is that a differences of >2 in AIC will usually relate to a p-value < 0.05.
 
 ```{r}
-AIC(lm3, lm2)
+AIC(lm3, lm4)
 ```
 
 The `step()` function does an automated search for the best candidate LM/GLM model through comparison of nested models using AIC. The search can be specified as one of "both", "backward", or "forward", with a default of "both". Furthermore, interaction terms are only included if the main interaction is also included. Generally, a stepwise search can be helpful in looking for the combination of terms that produces the lowest AIC; however, it is possible that the algorithm does not find the best model since not all term combinations may be fit. 
 
 A (ridiculously) complex model for predicting sepal length in the iris data set would be to include all other morphometric data and the species factor. One shortcut to this formulation is to use `~ .` as a way to include all variables besides the response variable. If we want the interaction terms as well, we would raise this term to the desired maximum degree of interaction. In the following example, we will start with this complex model and try to reduce it to a smaller, but more robust set of terms. 
 
-```{r include=FALSE}
+```{r eval = FALSE}
 # full model, up to a 4-degree interaction term
 fit0 <- lm(Sepal.Length ~ (.)^4, data = iris) 
 summary(fit0)
@@ -989,12 +994,12 @@ The above examples were for relatively simple univariate linear models, which ma
 
 ### Nonlinear Least Squares
 
-You will be dealing with nonlinear models later in the course. Conntrary to linear models, whose coefficients can be estimated directly, nonlinear model cofficients must be estimates iteratively, using numerical optimization algorithms to determine the best-fitting parameters. The most common is nonlinear least squares, which comes comes with the base installation of R (`nls()`). This function uses a [https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm](Gauss-Newton algorithm) by default, but there are other methods available. In the following example, we will be fitting a length-weight relationship (*power function*), and  
+You will be dealing with nonlinear models later in the course. Contrary to linear models, whose coefficients can be estimated directly, nonlinear model coefficients must be estimated iteratively, using numerical optimization algorithms to determine the best-fitting parameters. The most common method is nonlinear least squares, which comes comes with the base installation of R (`nls()`). This function uses a [https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm](Gauss-Newton algorithm) by default, but there are other methods available. In the following example, we will be fitting a von Bertalanffy growth function (`vbgf`) to length-at-age data, which is commonly used to describe growth in many fish stock assessments. The function will then search for the parameters that minimize the sum of squared errors (*SS*).    
 
 ```{r}
 # generate data
 set.seed(1)
-n <- 200
+n <- 100
 linf <- 60
 k <- 0.2
 t0 <- -0.1
@@ -1017,46 +1022,96 @@ newdat$length <- vbgf(linf = sol["linf"], k = sol["k"], t0 = sol["t0"],
   t = newdat$age)
 grid()
 lines(length ~ age, newdat, col = 4)
-text(min(df$age), max(df$length)*0.9, pos = 4, col = 4,
+text(0, max(df$length)*0.9, pos = 4, col = 4,
   labels = paste0("SS = ", round(sum((df$pred-df$length)^2))))
 text(8, 10, col = 4,
   labels = paste0(names(sol), " = ", round(sol, 2), collapse = "\n"))
 
 ```
 
-## Genetic algorithm
+### More general optimization
+
+If you want a bit more flexibility in how the model fit is minimized, you can define your own metric for minimization with `optim()`. For example, the above generated data has errors that increase with length, so it might be more appropriate to minimize the error in log space. The set-up is only slightly different; one embeds the `vbgf` inside of another function whose output is the metric to be minimized. In this case, I have chosen to use root mean squared error (*RMSE*) of log-transformed length. Here the search method is also a variation of a Newton algorithm, with box constraints (i.e. upper and lower parameter limits defined for the search).
+
+```{r}
+fitfun <- function(par = c(linf, k, t0), data = df){
+  pred <- vbgf(linf= par[1], k = par[2], t0 = par[3], t = data$age)
+  rmse <- sqrt(mean((log(data$length) - log(pred))^2, na.rm = T))
+  return(rmse)
+}
+
+fit <- optim(par = c(linf = 70, k = 0.1, t0 = -0.5), 
+  fn = fitfun, 
+  data = df,
+  lower = c(linf = 40, k = 0.01, t0 = -1), 
+  upper = c(linf = 100, k = 1, t0 = 1), 
+  method = "L-BFGS-B")
+sol <- fit$par
+
+df$pred <- vbgf(linf = sol[1], k = sol[2], t0 = sol[3], t = df$age)
+newdat = data.frame(age = seq(0, max(df$age), length.out = 100))
+newdat$length <- vbgf(linf = sol["linf"], k = sol["k"], t0 = sol["t0"], 
+  t = newdat$age)
+plot(length ~ age, df, xlim = c(0, max(df$age)), ylim = c(0, max(df$length)))
+grid()
+lines(length ~ age, newdat, col = 4)
+text(0, max(df$length)*0.9, pos = 4, col = 4,
+  labels = paste0("RMSE = ", 
+  round(sqrt(mean((log(df$pred)-log(df$length))^2)), 4)))
+text(8, 10, col = 4,
+  labels = paste0(names(sol), " = ", round(sol, 2), collapse = "\n"))
+
+```
+
+
+### Specialized algorithms
+
+In the above example, the optimal solution is likely to be clearly defined, but there may be other cases where the search algorithm gets stuck in a "local minimum", and does not find the best solution. This situation is illustrated in the figure below, where there is not a unimodal pattern to the parameter space.
+
+```{r, echo=FALSE, fig.align = "center", fig.pos = "H", fig.cap = "Global and local minima and maxima."}
+# img <- readJPEG("figures/Turtle_golfina_escobilla_oaxaca_mexico_claudio_giovenzana_2010.jpg")
+knitr::include_graphics("figures/Extrema_example_original.png", dpi = 400)
+```
+
+These situations may require optimization algorithms that are less likely to get stuck. One popular method is *simulated annealing* (SA), which is available in the optim function (`optim(, method = "SANN")`). This approach starts off by searching a large parameter space is a quite chaotic fashion, but slowly focuses on areas of minimum score (the analogy is the movement of atoms during a cooling process). 
+
+Another popular method is the use of a *genetic algorithm* (GA), which mimics an evolutionary process by treating parameters like genes, whose values contribute the the *fitness* of each *individual*. Using genetics-inspired processes, such as mutation and crossover, each iteration selects for individuals with the highest fitness to survive and mate, reproducing new individuals with unique parameter/gene combinations in the next generation. As with SA, the algorithm will usually start off with a wide, random set of parameter combinations, which will be continually refined over the generations to focus on areas of highest fitness. The mutation rate is especially important in defining the degree to which the population might escape local minima to explore new areas of the parameter space.
+
+The example of fitting the `vbgf` is probably not plagued by issues of local minima, but is used for consistency with the above methods. Fitting the VBGF to length-frequency data does have issues with local minima, and GA has been applied to such fitting excercises (see `ELEFAN_GA` from the TropFishR package).
 
 ```{r}
 library(GA)
-plot(length ~ age, df, xlim = c(0, max(df$age)), ylim = c(0, max(df$length)))
 
-fitness <- function(par = c(linf, k, t0), data = df){
+fitfun <- function(par = c(linf, k, t0), data = df){
   pred <- vbgf(linf= par[1], k = par[2], t0 = par[3], t = data$age)
-  SS <- sum((data$length - pred)^2, na.rm = T)
-  return(-SS) # sign flip since we are trying to maximize fitness 
+  rmse <- sqrt(mean((log(data$length) - log(pred))^2, na.rm = T))
+  return(-rmse) # flip sign, as ga tries to maximize the fitness
 }
 
-fit <- ga(type = "real-valued", fitness = fitness, 
+fit <- ga(type = "real-valued", fitness = fitfun, 
   data = df, 
   lower = c(linf = 40, k = 0.01, t0 = -1), 
   upper = c(linf = 100, k = 1, t0 = 1), 
   popSize = 50, maxiter = 200,
   monitor = F, seed = 1111)
 sol <- fit@solution
+# plot(fit)
 
 df$pred <- vbgf(linf = sol[1], k = sol[2], t0 = sol[3], t = df$age)
 newdat = data.frame(age = seq(0, max(df$age), length.out = 100))
 newdat$length <- vbgf(linf = sol[,"linf"], k = sol[,"k"], t0 = sol[,"t0"], 
   t = newdat$age)
+
+plot(length ~ age, df, xlim = c(0, max(df$age)), ylim = c(0, max(df$length)))
 grid()
 lines(length ~ age, newdat, col = 4)
-text(min(df$age), max(df$length)*0.9, pos = 4, col = 4,
-  labels = paste0("SS = ", round(sum((df$pred-df$length)^2))))
+text(0, max(df$length)*0.9, pos = 4, col = 4,
+  labels = paste0("RMSE = ", 
+  round(sqrt(mean((log(df$pred)-log(df$length))^2)), 4)))
 text(8, 10, col = 4,
   labels = paste0(colnames(sol), " = ", round(sol, 2), collapse = "\n"))
-# plot(fit)
-```
 
+```
 
 
 
@@ -1455,7 +1510,7 @@ pva.plot(N, time=years, xlab="years", title=title)
 ### Rhino 5. Additional poaching mortality
 One more bit of reality to the model – It is estimated that there is additional mortality from illegal poaching in the park at a rate of 2 \% of the population per year on average. We will also incorporate this as a probability in the same way that we dealt with birth and death rates.
 
-__TASK:__ Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
+> **\textcolor{blue}{TASK:}** Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
 
 (Hint: as with `Pb` and `Pd`, you will need to create a vector of length `N[t-1]` with random uniformly-distributed numbers and use this to calculate the number of poached individuals. This will become an additional source of mortality in the calculation of `N[t]`)
 
@@ -1508,7 +1563,7 @@ for(j in 1:runs){
 pva.plot(N, time=years, xlab="years", title=title, quasi.ext=20)
 ```
 
-__TASK:__ Using the full **Rhino 6** model, incorporate the various strategies above (differing cull rates, and ceilings) and compare the probability of quasi-extinction. Which strategy can both prevent population explosions while maintaining a low level of extinction risk (i.e. does not meet the criteria of "Vulnerable" - probability of extinction is at least 10 \% within 100 years.)?
+> **\textcolor{blue}{TASK:}**  Using the full **Rhino 6** model, incorporate the various strategies above (differing cull rates, and ceilings) and compare the probability of quasi-extinction. Which strategy can both prevent population explosions while maintaining a low level of extinction risk (i.e. does not meet the criteria of "Vulnerable" - probability of extinction is at least 10 \% within 100 years.)?
 
 
 
@@ -1563,7 +1618,7 @@ $$
 
 Each element of this vector marks the individuals within an age class at time $t$.
 
-**TASK:** Use the following information to create an age-structured population model for the chipmunk population. 
+> **\textcolor{blue}{TASK:}**  Use the following information to create an age-structured population model for the chipmunk population. 
 
 Assume a population that can be described by the following matrix: 
 
@@ -1654,7 +1709,7 @@ log(2/r)
 
 The dominant eigenvalue is more like a percent increase [\%] in its interpretation, such that a value of 1.1 would mean that a population is increasing at 10% per time unit ((1.1 – 1.0) * 100\% = 10\%).  A value <1.0 means that the population is decreasing (*e.g.* ((0.9 - 1.0) * 100\% = -10\%). 
 
-**Task:** Compare $\lambda$ to that of the rate of population change between the last two iterations (*i.e.* t=9 vs. t=10). As a first step, `rowSums(POP)` will give you the sum population size by summing all age classes at each time step (row).
+> **\textcolor{blue}{TASK:}**  Compare $\lambda$ to that of the rate of population change between the last two iterations (*i.e.* t=9 vs. t=10). As a first step, `rowSums(POP)` will give you the sum population size by summing all age classes at each time step (row).
 
 ```{r, echo=FALSE, eval=FALSE, results='hide'}
 POPsum <- rowSums(POP)
@@ -1729,9 +1784,9 @@ l.new <- Re(eigen(M.new)$val[1])
 ```
 
 
-**Task:** Calculate the elasticity for each of the fecundity values in the age-structured Leslie matrix from above. Then, compare to their respective reproductive values.
+> **\textcolor{blue}{TASK:}**  Calculate the elasticity for each of the fecundity values in the age-structured Leslie matrix from above. Then, compare to their respective reproductive values.
 
-**Extra task:** Create functions for the following matrix outputs:
+> **\textcolor{blue}{EXTRA TASK:}**  Create functions for the following matrix outputs:
 
 * Rate of population growth & stable distribution
 * Reproductive value
@@ -1904,7 +1959,7 @@ round(Re(eigen(L)$vectors[,1]) / sum(Re(eigen(L)$vectors[,1])), 3)
 ```
 
 
-**Task:** Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “lambda” (`grd$lambda`), for storing the resulting rate of population growth:
+> **\textcolor{blue}{TASK:}**  Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “lambda” (`grd$lambda`), for storing the resulting rate of population growth:
 
 ```{r}
 Fs <- seq(0, 1, length.out=11)
@@ -1968,7 +2023,7 @@ plot.growth(grd)
 
 
 
-**Task 2:** Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagram (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
+> **\textcolor{blue}{TASK:}**  Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagram (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
 
 ```{r, echo=FALSE, fig.align="center"}
 knitr::include_graphics("figures/wolff_etal_ypr.png")
@@ -2078,8 +2133,7 @@ knitr::kable(U, caption = "Stage-class population matrix for loggerhead sea turt
 ```
 
 
-__TASK:__
-
+> **\textcolor{blue}{TASK:}**
 1. Create a matrix as seen above (Hint: you can adapt the previous model example by replacing the elements and dimensions of the matrix). 
 2. Using the starting population vector, `N0=c(100, 10, 5, 4, 3, 2, 1)`, run the model for 100 years to view the population stage trajectories. 
 3. Calculate the rate of population change and population structure at equilibrium?
@@ -2088,13 +2142,9 @@ __TASK:__
 You will notice that with these original parameters the population is decreasing. One pervasive problem in sea turtle conservation is the removal of eggs from nests (by man, feral dogs, pigs etc.). In many parts of the world, the protection of nesting beaches is a common strategy for conservation. Would this be a worthwhile strategy for this Loggerhead population?
 
 
-__TASK:__ 
+> **\textcolor{blue}{TASK:}** Calculate the new rate of population change under a scenario of complete nest protection - Although unrealistic, assume that all eggs/hatchlings (stage 1) survive to be small juveniles (stage 2).
 
-Calculate the new rate of population change under a scenario of complete nest protection - Although unrealistic, assume that all eggs/hatchlings (stage 1) survive to be small juveniles (stage 2).
-
-__TASK:__ 
-
-Explore the elasticity of transition values of the matrix ($p_x$, $g_x$) and the reproductive values ($f_x$) of each class. What do the results tell us about where conservation efforts should be focused?
+> **\textcolor{blue}{TASK:}** Explore the elasticity of transition values of the matrix ($p_x$, $g_x$) and the reproductive values ($f_x$) of each class. What do the results tell us about where conservation efforts should be focused?
 
 \newpage
 
@@ -2285,9 +2335,9 @@ mseplot(df)
 ```
 
 
-__TASK 1:__ Set up an loop to run the above MSE with uncertainty for 100 runs, and record the true biomass (`Breal`) from each run in a matrix (years (rows) by runs (cols)). Calculate the number of runs that dropped below the biomass threshold of 350 (i.e. `Blim`) during the last 20 years of the simulation.
+> **\textcolor{blue}{TASK:}**  Set up an loop to run the above MSE with uncertainty for 100 runs, and record the true biomass (`Breal`) from each run in a matrix (years (rows) by runs (cols)). Calculate the number of runs that dropped below the biomass threshold of 350 (i.e. `Blim`) during the last 20 years of the simulation.
 
-__TASK 2:__ Try different combinations of `Btrig` and `Ftarg`. Record the probability of dropping below `Blim` and the mean yield. Try and identify the combination resulting in the highest mean yield while having a risk lower than 5\%.
+> **\textcolor{blue}{TASK:}**  Try different combinations of `Btrig` and `Ftarg`. Record the probability of dropping below `Blim` and the mean yield. Try and identify the combination resulting in the highest mean yield while having a risk lower than 5\%.
 
 \newpage
 
