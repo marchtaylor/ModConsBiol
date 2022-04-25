@@ -2343,9 +2343,86 @@ mseplot(df)
 
 # Metapopulation model
 
-## Metapopulation 1: single simulation
+## Metapopulation 1: occupancy model
 
-This is just a generic example of a metapopulation consisting of 7 populations. The seven populations are located close to each other forming a compact system. Dispersal (in both directions) can occur between a population and its three nearest neighbors, except for the population in the middle, which exchanges migrants from all other populations [from @burgman_risk_1993]. 
+The following is an example of an occupancy model for a metapopulation consisting of three populations. All populations are connected to each other and are either occupied or not. There is a baseline probability that a single population will go extinct (*P*) (i.e. local extinction). As long as there is one or more occupied populations in the metapopulation, unoccupied populations may be recolonized at a given probability (*R*). Finally, local extinction events can be correlated to each other (*C*), which will increase the probability of coinciding extinctions. The following function code will be used to simulate the described metapopulation, followed by several tasks to explore the influence of the model settings.
+
+
+```{r}
+metapop <- function(
+  npop = 3, # Number of populations
+  nyear = 500, # Number of years to simulate per run
+  nrun = 1000, # Number of runs
+  P = 0.0005, # Probability of annual extinction (Default: 0.0005)
+  R = 0.001, # Probability of recolonization (Default: 0.001)
+  C = 0.75, # Correlation of extinction probability (P) among populations
+  plot = TRUE, # Plot output?
+  progressBar = TRUE # Include progress bar?
+){
+  if(progressBar){ # setup progress bar
+    pb = txtProgressBar(min = 0, max = nrun, style = 3)
+  } 
+  N <- 0*seq(nyear)
+  for(i in seq(nrun)){ # loop for runs 
+    ### create (correlated) extinctions
+    # multivariate normal distributions by pop with correlation
+    mu <- rep(0, npop)
+    Sigma <- matrix(C, nrow = npop, ncol = npop)
+    diag(Sigma) <- 1
+    Ci <- MASS::mvrnorm(n = nyear, mu = mu, Sigma = Sigma)
+    # convert to uniform distribution
+    Ci <- pnorm(Ci)
+
+    ### run model
+    Ni = matrix(0, nrow = nyear, ncol = npop)
+    Ni[1,] <- 1
+    for(j in 2:nyear){ # loop for years
+      # extinction
+      Ni[j,] <- Ni[j-1,] * as.numeric(Ci[j,] > P)
+      
+      # recolonization
+      if(sum(Ni[j,]) > 0){
+        hit <- which(Ni[j,] == 0 & runif(npop) < R)
+        Ni[j, hit] <- 1
+      }
+    }
+    
+    ### record total population
+    Ni <- as.numeric(rowSums(Ni) > 0)
+    N <- N + Ni
+    
+    if(progressBar) setTxtProgressBar(pb, i) # update progress bar
+  }
+  
+  if(progressBar) close(pb) # close progress bar
+  
+  pExt <- 1 - N/nrun # probability of extinction by year
+  dftmp <- data.frame(year = seq(nyear), pExt = pExt)
+  if(plot){
+    plot(dftmp, t = "l", ylab = "Extinction probability", xlab = "")
+    legend("topleft", legend = paste0("Final prob = ", 
+      round(tail(dftmp$pExt, 1), 5)), bty = "n")
+  }
+  
+  ### output
+  return(dftmp)
+}
+```
+
+
+> **\textcolor{blue}{TASK:}** Using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) affect the probability of extinction over a period of 500 years. Assume no extinction correlation (*i.e.* `C = 0`) and maintain the default annual extinction probability (`P = 0.0005`). *Hint: low recolonization rates may be needed to observe a significant number of extinctions (e.g. R < 2%). Increasing the number of runs will improve the robustness of the result, but at a computation cost.*
+
+> **\textcolor{blue}{EXTRA TASK:}** Try and create a single plot with the results from several recolonization settings. Add a labels or a legend to aid in the plot's interpretation. 
+
+You should observe the probability of extinction increasing over time as additional metapopulations become extinct. Nevertheless, rates should be quite low given the rate of annual extinction. We will now focus on the cumulative extinction probability after 500 years. In addition to recolonization, will will now look at the importance of extinction correlations.
+
+> **\textcolor{blue}{TASK:}** Again, using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) and extinction correlation (`0 < C < 1`) affect the probability of extinction over a period of 500 years. Keep track of the parameters used and their results for following group discussion (or plot on your own). 
+
+
+
+## Metapopulation 2a: numbers based, single simulation
+
+This following a generic example of a metapopulation consisting of 7 populations. The seven populations are located close to each other forming a compact system. Dispersal (in both directions) can occur between a population and its three nearest neighbors, except for the population in the middle, which exchanges migrants from all other populations [from @burgman_risk_1993]. 
 
 ```{r, echo=FALSE, fig.align="center", fig.cap = "Spatial pattern of the example metapopulation"}
 knitr::include_graphics("figures/metapopulation.png")
@@ -2406,7 +2483,7 @@ for(i in 1:ncol(N)){
 }
 ```
 
-## Metapopulation 2: multiple simulations
+## Metapopulation 2b: multiple simulations
 
 We can also perform several runs of the simulation and calculate the probability of quasi-extinction as was done in the Rhino example.
 
