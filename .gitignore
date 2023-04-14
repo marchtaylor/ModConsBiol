@@ -5,5 +5,7 @@
 working
 ModConsBiol_handbook_files
 ModConsBiol_handbook_cache
+ModConsBiol_handbook.R
+README.html
 *.png
 script1.R
