@@ -1701,8 +1701,9 @@ The population doubling time can also be calculated directly:
 
 ```{r}
 # Doubling time
-r <- log(Re(x$values)[1])
-log(2/r) 
+lambda <- Re(x$values)[1]
+log(2)/log(lambda)
+
 ```
 
 
