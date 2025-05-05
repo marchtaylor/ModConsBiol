@@ -8,19 +8,23 @@ header-includes:
   \usepackage{caption}
   \usepackage{float}
 output: 
-  # rmarkdown::html_document:
-  #   fig_caption: yes
-  #   number_sections: true
-  #   df_print: paged
-  #   toc: true
-  #   toc_depth: 2
-  #   toc_float:
-  #     collapsed: false
-  #   highlight: tango
-  pdf_document:
-    number_sections: yes
+  rmarkdown::html_document:
     fig_caption: yes
+    number_sections: true
+    df_print: paged
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+    code_folding: show
     highlight: tango
+  
+  # pdf_document:
+  #   latex_engine: xelatex
+  #   number_sections: yes
+  #   fig_caption: yes
+  #   highlight: tango
+    
 bibliography: refs.bib
 ---
 
@@ -62,7 +66,7 @@ x * y
 ```
 
 \vspace{24pt}
-### starting settings
+### Starting settings
 For each analysis that you do in R, it may be helpful to customize your settings so that you can keep all related information together. In the following example, the R script contains specific path definitions to data locations, function locations, and the working directory has been set. In the script, two objects are exported to the previously defined working directory.
 
 ```{r, eval=FALSE}
@@ -252,7 +256,7 @@ seq(from=0,to=100,by=4)
 An example matrix appears in the Renaissance engraving "Melancholia I" by the German artist and amateur mathematician Albrecht Dürer. This image is filled with mathematical symbolism. The matrix in the upper right corner is known as a magic square and was believed by many in Dürer`s time to have genuinely magical properties. 
 
 ```{r, echo=FALSE, fig.align="center", fig.cap="Albrecht Dürer - Melencolia I"}
-knitr::include_graphics("figures/Albrecht_Duerer_-_Melencolia_I_-_Google_Art_Project_(_AGDdr3EHmNGyA).jpg")
+knitr::include_graphics("figures/Albrecht_Duerer_-_Melencolia_I_-_Google_Art_Project_(_AGDdr3EHmNGyA).jpg", dpi = 100)
 ```
 
 
@@ -693,7 +697,7 @@ hist(x2, xlim=ran.x, breaks=levs, col="grey")
 When running R in a stand-alone window, you may have the option to save graphics directly from the File menu (>>File>>Save as):
 
 ```{r, echo=FALSE, fig.align="center"}
-knitr::include_graphics("figures/export_directly_from_device.png", dpi = 400)
+knitr::include_graphics("figures/export_directly_from_device.png", dpi = 300)
 ```
  
 Or, you can use the following functions to save an active device:
@@ -1070,7 +1074,7 @@ In the above example, the optimal solution is likely to be clearly defined, but 
 
 ```{r, echo=FALSE, fig.align = "center", fig.pos = "H", fig.cap = "Global and local minima and maxima."}
 # img <- readJPEG("figures/Turtle_golfina_escobilla_oaxaca_mexico_claudio_giovenzana_2010.jpg")
-knitr::include_graphics("figures/Extrema_example_original.png", dpi = 400)
+knitr::include_graphics("figures/Extrema_example_original.png", dpi = 300)
 ```
 
 These situations may require optimization algorithms that are less likely to get stuck. One popular method is *simulated annealing* (SA), which is available in the optim function (`optim(, method = "SANN")`). This approach starts off by searching a large parameter space is a quite chaotic fashion, but slowly focuses on areas of minimum score (the analogy is the movement of atoms during a cooling process). 
@@ -1239,8 +1243,9 @@ par(op)
 
 \newpage
 
-#	Population viability analysis (PVA)
-## Case Study: White Rhino (*Ceratotherium simum*)
+#	Population viability analysis (PVA) 
+
+**Case Study: White Rhino (*Ceratotherium simum*)**
 
 ```{r, echo=FALSE, fig.align="center"}
 knitr::include_graphics("figures/800px-White_rhino_2008_08.jpg", dpi = 150)
@@ -1267,7 +1272,7 @@ Our purpose is now to develop a management plan for the next 50 years. We should
 
 \vspace{24pt}
 
-### Rhino 1. Discrete time and deterministic prediction
+## Rhino 1. Discrete time and deterministic prediction
 First, we have to define a list of model assumption that should be realistic simplifications of the natural situation: 
 
 * There are no limited resources and there are no other density-dependent effects.
@@ -1325,7 +1330,7 @@ lines(years, 35*exp((b-d)*0:49), lty=2)
 
 \vspace{24pt}
 
-### Rhino 2. Demographic variance
+## Rhino 2. Demographic variance
 In this model all parameters are the same as in the first discrete model of **Rhino 1**, except that birth and death rates will now be treated as probabilities for each individual in the population. In computational terms, 2 lists of random numbers will be generated (`Pb` and `Pd`, for births and deaths, respectively) of length equal to the number of individuals in the population. The number of instances where values are lower than the birth or death probabilities will define the changes in the population.
 
 ```{r}
@@ -1359,7 +1364,7 @@ plot(years, N, type="l", ylim=c(0,max(N)),
 
 \vspace{24pt}
 
-###	Rhino 3. Environmental noise
+##	Rhino 3. Environmental noise
 In this simulation, we expand on the demographic model of **Rhino 2** by adding random fluctuations in birth and death rates as influenced by the environment. We first define the variance that the environment can have on the rates with a coefficient of variance, cvar. The assumption is that birth and death rates will be affected in opposite directions; e.g. a year with a high amount of rain may create more food for the Rhino population, resulting in an increase in birth rate by 5 \% and a decrease in death rate by 5 \%. So, the original assumption that births and deaths are mutually independent is no longer the case.
 
 ```{r}
@@ -1404,7 +1409,7 @@ plot(years, N, type="l", ylim=c(0,max(N)),
 
 \vspace{24pt}
 
-###	Rhino 4. Multiple simulations - PVA and the concept of quasi-extinction
+##	Rhino 4. Multiple simulations - PVA and the concept of quasi-extinction
 
 Now we will run our model including demographic variability and environmental noise over many simulations. This is the heart of PVA in that it allows us to quantify probabilities of risk given the results of many simulations. 
 By calculating the probability of quasi-extinction for a given threshold, we can define the risk of extinction according to the IUCN risk categories [@mace_assessing_1991]. First we can run 100 simulations and save the population trajectories in a new object `N`. Instead of a one-dimensional vector, `N` is now a matrix where columns will be the results of each simulation. The script nests the **Rhino 3** model into a second loop for each simulation run `j`.
@@ -1507,7 +1512,7 @@ pva.plot(N, time=years, xlab="years", title=title)
 
 \vspace{24pt}
 
-### Rhino 5. Additional poaching mortality
+## Rhino 5. Additional poaching mortality
 One more bit of reality to the model – It is estimated that there is additional mortality from illegal poaching in the park at a rate of 2 \% of the population per year on average. We will also incorporate this as a probability in the same way that we dealt with birth and death rates.
 
 > **\textcolor{blue}{TASK:}** Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
@@ -1519,10 +1524,10 @@ One more bit of reality to the model – It is estimated that there is additiona
 
 \vspace{24pt}
 
-### Rhino 6. Management scenarios
+## Rhino 6. Management scenarios
 Now we will run our full model including demographic variability, environmental noise and poaching. Two additional parameters have been added in order to simulate management strategies. The parameter cull_const is a constant representing the number of individuals that the park's managers will cull each year. The second parameter, *ceiling*, defines a maximum population level whereby culling will occur for superior values.
 
-```{r, fig.width=7.5}
+```{r, fig.width=7.5, class.source = 'fold-hide'}
 title = "Rhino 6. Management"
 runs = 100
 years = 1986:2035 
@@ -1672,10 +1677,7 @@ for (i in 2:length(POP[1,])){
 	lines(seq(time),POP[,i],col=i)
 }
 
-legend("topleft",
-c(paste("class",(1:length(N0)))),
-lwd=1,
-col=c(1:length(N0)))
+legend("topleft", c(paste("class",(1:length(N0)))), lwd=1, col=c(1:length(N0)))
 ```
 
 
@@ -2058,8 +2060,8 @@ Again, a vector is used to hold the number of individuals within a size/stage cl
 
 
 ## Case Study: Loggerhead turtle stage-based matrix model
-```{r, echo=FALSE, fig.align="center", fig.cap="A loggerhead caught by a longline. Credit: scienceblogs.com", dpi=50}
-knitr::include_graphics("figures/c_caretta.jpg")
+```{r, echo=FALSE, fig.align="center", fig.cap="A loggerhead caught by a longline. Credit: scienceblogs.com"}
+knitr::include_graphics("figures/c_caretta.jpg", dpi = 50)
 ```
 
 The case of the Loggerhead sea turtle (Caretta caretta), presented by Crouse et al. (1987), will be used as an example of a stage-based Usher matrix model. The Loggerhead population has been divided into 7 life history stages. 
@@ -2165,8 +2167,8 @@ This perceived state of the resource forms the basis of management decisions, e.
 The performance of a given MP can be evaluated using any criteria agreed upon. For example, ICES requires that a given MP is able to maintain a stock's biomass above a given reference point, below which the stock's productivity may be impaired. For example, the spawning stock biomass (SSB) associated with the last above-average recruitment ($B_{lim} = 107,000$). If a given HCR does not maintain the SSB above Blim with a probability of 95\%, then it is not considered precautionary.  
 
 
-```{r, echo=FALSE, fig.align="center", fig.cap = "Conceptual overview of the management strategy evaluation modelling process (from Punt et al. 2016).", dpi=150}
-knitr::include_graphics("figures/Punt_etal_fig1.png")
+```{r, echo=FALSE, fig.align="center", fig.cap = "Conceptual overview of the management strategy evaluation modelling process (from Punt et al. 2016)."}
+knitr::include_graphics("figures/Punt_etal_fig1.png", dpi = 100)
 ```
 
 
@@ -2426,7 +2428,7 @@ You should observe the probability of extinction increasing over time as additio
 This following a generic example of a metapopulation consisting of 7 populations. The seven populations are located close to each other forming a compact system. Dispersal (in both directions) can occur between a population and its three nearest neighbors, except for the population in the middle, which exchanges migrants from all other populations [from @burgman_risk_1993]. 
 
 ```{r, echo=FALSE, fig.align="center", fig.cap = "Spatial pattern of the example metapopulation"}
-knitr::include_graphics("figures/metapopulation.png")
+knitr::include_graphics("figures/metapopulation.png", dpi = 100)
 ```
 
 The following code will illustrate how the connectivity, distance, correlation and covariance matrices are constructed. 
