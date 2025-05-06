@@ -113,7 +113,7 @@ levelplot(matrix(runif(100), 10, 10))
 \vspace{24pt}
 
 ## Language description
-###	variables
+###	Variables
 When R encounters a new variable name, it automatically creates the variable and allocates the appropriate amount of storage. If the variable already exists, R changes its contents and, if necessary, allocates new storage. For example:
 
 ```{r, results = "hide"}
@@ -134,7 +134,7 @@ a #should return the value 2 previously defined
 ```
 
 ### Numbers
-R uses conventional decimal notation, with an optional decimal point and leading plus or minus sign, for numbers. Scientific notation uses the letter “e” to specify a power-of-ten scale factor. Some examples of legal numbers are:
+R uses conventional decimal notation, with an optional decimal point and leading plus or minus sign, for numbers. Scientific notation uses the letter “e” to specify a power-of-ten scale factor. Some examples of legal numbers are (*note:* `options`, e.g. `scipen`, `digits`, will affect the printed output despite higher internal precision):
 
 ```{r, results = "hide"}
 0.0001  
@@ -338,7 +338,7 @@ X
 ```
 
 \vspace{24pt}
-> **\textcolor{blue}{TASK:}**  Create the 10x10 matrix called "R", which has sequential elements 4-400 (by 4) (Use `seq()` function):
+> **TASK:** Create the 10x10 matrix called "R", which has sequential elements 4-400 (by 4) (Use `seq()` function):
 
 ```{r, echo=FALSE}
 R <- matrix(seq(from = 4, to = 400, by = 4), nrow = 10, ncol = 10)
@@ -346,7 +346,7 @@ R
 ```
 
 
-> **\textcolor{blue}{EXTRA TASK:}**  Can you also create the same matrix using " `:` " function?
+> **EXTRA TASK:**  Can you also create the same matrix using " `:` " function?
 
 
 \vspace{24pt}
@@ -447,19 +447,16 @@ tmp[1]
 as.vector(by(iris$Sepal.Length, iris$Species, mean))
 ```
 
-***NOTE:*** The `plyr` package gives a lot of flexibility to these types of functions and is worth learning. e.g.:
+***NOTE:*** The `dplyr` package gives a lot of flexibility to these types of functions and is worth learning. e.g.:
 
 ```{r, results="hide"}
-library(plyr)
-# returns a new data.frame
-ddply(iris, .(Species), summarize, meanSL=mean(Sepal.Length)) 
-# adds new variable to a new data.frame
-ddply(iris, .(Species), mutate, meanSL=mean(Sepal.Length)) 
+library(dplyr)
 
-# returns a new array
-daply(iris, .(Species), summarize, meanSL=mean(Sepal.Length)) 
-# returns a new list
-dlply(iris, .(Species), summarize, meanSL=mean(Sepal.Length)) 
+# returns a new data.frame
+iris |> summarise(meanSL = mean(Sepal.Length), .by = Species)
+
+# adds new variable to a new data.frame
+iris |> mutate(meanSL = mean(Sepal.Length), .by = Species)
 ```
 
 
@@ -553,7 +550,7 @@ r # to view the resulting vector
 sum(r)
 ```
 
-> **\textcolor{blue}{TASK:}**  Try repeating only the last 3 lines of code – the result will be different without resetting the seed value.
+> **TASK:**  Try repeating only the last 3 lines of code – the result will be different without resetting the seed value.
 
 \vspace{24pt}
 
@@ -697,7 +694,7 @@ hist(x2, xlim=ran.x, breaks=levs, col="grey")
 When running R in a stand-alone window, you may have the option to save graphics directly from the File menu (>>File>>Save as):
 
 ```{r, echo=FALSE, fig.align="center"}
-knitr::include_graphics("figures/export_directly_from_device.png", dpi = 300)
+knitr::include_graphics("figures/export_directly_from_device.png", dpi = 200)
 ```
  
 Or, you can use the following functions to save an active device:
@@ -882,7 +879,7 @@ As a general rule, one should start by removing higher-order terms first (e.g. i
 
 This logic is within the automated stepwise search routine found in the function `step()` (introduced below), which usually makes sense, however it is definitely not a hard and fast rule. A basic guideline might be to try and formulate models are plausible given your specific question, and treat the inclusion of terms as hypotheses to be tested (see discussion here: <http://stats.stackexchange.com/q/4901/10675>). 
 
-> **\textcolor{blue}{TASK:}** Some of the above models for sepal length show a negative prediction at small petal lengths. Is there another, more realistic, model that might be fit?
+> **TASK:** Some of the above models for sepal length show a negative prediction at small petal lengths. Is there another, more realistic, model that might be fit?
 
 
 ### ANOVA, F-test
@@ -959,7 +956,7 @@ legend("topleft", legend=paste("deg.", 1:4), col=2:5, lty=1,
   title="polynomial type")
 ```
 
-> **\textcolor{blue}{TASK:}** Using `anova()`, see if you can arrive to the best model by eliminating insignificant terms.
+> **TASK:** Using `anova()`, see if you can arrive to the best model by eliminating insignificant terms.
 
 
 ### Akaike Information Criterion (AIC) and stepwise search
@@ -1515,7 +1512,7 @@ pva.plot(N, time=years, xlab="years", title=title)
 ## Rhino 5. Additional poaching mortality
 One more bit of reality to the model – It is estimated that there is additional mortality from illegal poaching in the park at a rate of 2 \% of the population per year on average. We will also incorporate this as a probability in the same way that we dealt with birth and death rates.
 
-> **\textcolor{blue}{TASK:}** Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
+> **TASK:** Add additional lines of code to **Rhino 4** to incorporate the probability of poaching.
 
 (Hint: as with `Pb` and `Pd`, you will need to create a vector of length `N[t-1]` with random uniformly-distributed numbers and use this to calculate the number of poached individuals. This will become an additional source of mortality in the calculation of `N[t]`)
 
@@ -1568,7 +1565,7 @@ for(j in 1:runs){
 pva.plot(N, time=years, xlab="years", title=title, quasi.ext=20)
 ```
 
-> **\textcolor{blue}{TASK:}**  Using the full **Rhino 6** model, incorporate the various strategies above (differing cull rates, and ceilings) and compare the probability of quasi-extinction. Which strategy can both prevent population explosions while maintaining a low level of extinction risk (i.e. does not meet the criteria of "Vulnerable" - probability of extinction is at least 10 \% within 100 years.)?
+> **TASK:**  Using the full **Rhino 6** model, incorporate the various strategies above (differing cull rates, and ceilings) and compare the probability of quasi-extinction. Which strategy can both prevent population explosions while maintaining a low level of extinction risk (i.e. does not meet the criteria of "Vulnerable" - probability of extinction is at least 10 \% within 100 years.)?
 
 
 
@@ -1623,7 +1620,7 @@ $$
 
 Each element of this vector marks the individuals within an age class at time $t$.
 
-> **\textcolor{blue}{TASK:}**  Use the following information to create an age-structured population model for the chipmunk population. 
+> **TASK:**  Use the following information to create an age-structured population model for the chipmunk population. 
 
 Assume a population that can be described by the following matrix: 
 
@@ -1712,7 +1709,7 @@ log(2)/log(lambda)
 
 The dominant eigenvalue is more like a percent increase [\%] in its interpretation, such that a value of 1.1 would mean that a population is increasing at 10% per time unit ((1.1 – 1.0) * 100\% = 10\%).  A value <1.0 means that the population is decreasing (*e.g.* ((0.9 - 1.0) * 100\% = -10\%). 
 
-> **\textcolor{blue}{TASK:}**  Compare $\lambda$ to that of the rate of population change between the last two iterations (*i.e.* t=9 vs. t=10). As a first step, `rowSums(POP)` will give you the sum population size by summing all age classes at each time step (row).
+> **TASK:**  Compare $\lambda$ to that of the rate of population change between the last two iterations (*i.e.* t=9 vs. t=10). As a first step, `rowSums(POP)` will give you the sum population size by summing all age classes at each time step (row).
 
 ```{r, echo=FALSE, eval=FALSE, results='hide'}
 POPsum <- rowSums(POP)
@@ -1787,9 +1784,9 @@ l.new <- Re(eigen(M.new)$val[1])
 ```
 
 
-> **\textcolor{blue}{TASK:}**  Calculate the elasticity for each of the fecundity values in the age-structured Leslie matrix from above. Then, compare to their respective reproductive values.
+> **TASK:**  Calculate the elasticity for each of the fecundity values in the age-structured Leslie matrix from above. Then, compare to their respective reproductive values.
 
-> **\textcolor{blue}{EXTRA TASK:}**  Create functions for the following matrix outputs:
+> **EXTRA TASK:**  Create functions for the following matrix outputs:
 
 * Rate of population growth & stable distribution
 * Reproductive value
@@ -1962,7 +1959,7 @@ round(Re(eigen(L)$vectors[,1]) / sum(Re(eigen(L)$vectors[,1])), 3)
 ```
 
 
-> **\textcolor{blue}{TASK:}**  Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “lambda” (`grd$lambda`), for storing the resulting rate of population growth:
+> **TASK:**  Explore the effect of different rates of fishing mortality (F) and length of 1st capture (Lcap) on the growth rate of the population. The following object, grd, should get you started. It gives all possible combinations of F and Lcap across a given range of values, and includes an empty variable, called “lambda” (`grd$lambda`), for storing the resulting rate of population growth:
 
 ```{r}
 Fs <- seq(0, 1, length.out=11)
@@ -2026,7 +2023,7 @@ plot.growth(grd)
 
 
 
-> **\textcolor{blue}{TASK:}**  Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagram (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
+> **TASK:**  Discuss how the exploration above differs from that of a Yield per Recruit (Y/R) model. The figure below (left) shows a Yield Isopleth Diagram (YID)[@beverton_dynamics_1957], with Y/R as a function of fishing mortality (F) and length of 1st capture (Lcap). Escapement Spawning Stock (ESS) is the biomass of mature individuals (presented as a relative value below to that of the virgin, unfished stock). Fraction Megaspawners (MS) refers to the fraction of fish that are at least 10% larger than the size at which an unfished stock (F=0) maximizes cohort biomass (Lopt):
 
 ```{r, echo=FALSE, fig.align="center"}
 knitr::include_graphics("figures/wolff_etal_ypr.png")
@@ -2136,7 +2133,7 @@ knitr::kable(U, caption = "Stage-class population matrix for loggerhead sea turt
 ```
 
 
-> **\textcolor{blue}{TASK:}**
+> **TASK:**
 1. Create a matrix as seen above (Hint: you can adapt the previous model example by replacing the elements and dimensions of the matrix). 
 2. Using the starting population vector, `N0=c(100, 10, 5, 4, 3, 2, 1)`, run the model for 100 years to view the population stage trajectories. 
 3. Calculate the rate of population change and population structure at equilibrium?
@@ -2145,9 +2142,9 @@ knitr::kable(U, caption = "Stage-class population matrix for loggerhead sea turt
 You will notice that with these original parameters the population is decreasing. One pervasive problem in sea turtle conservation is the removal of eggs from nests (by man, feral dogs, pigs etc.). In many parts of the world, the protection of nesting beaches is a common strategy for conservation. Would this be a worthwhile strategy for this Loggerhead population?
 
 
-> **\textcolor{blue}{TASK:}** Calculate the new rate of population change under a scenario of complete nest protection - Although unrealistic, assume that all eggs/hatchlings (stage 1) survive to be small juveniles (stage 2).
+> **TASK:** Calculate the new rate of population change under a scenario of complete nest protection - Although unrealistic, assume that all eggs/hatchlings (stage 1) survive to be small juveniles (stage 2).
 
-> **\textcolor{blue}{TASK:}** Explore the elasticity of transition values of the matrix ($p_x$, $g_x$) and the reproductive values ($f_x$) of each class. What do the results tell us about where conservation efforts should be focused?
+> **TASK:** Explore the elasticity of transition values of the matrix ($p_x$, $g_x$) and the reproductive values ($f_x$) of each class. What do the results tell us about where conservation efforts should be focused?
 
 \newpage
 
@@ -2338,9 +2335,9 @@ mseplot(df)
 ```
 
 
-> **\textcolor{blue}{TASK:}**  Set up an loop to run the above MSE with uncertainty for 100 runs, and record the true biomass (`Breal`) from each run in a matrix (years (rows) by runs (cols)). Calculate the number of runs that dropped below the biomass threshold of 350 (i.e. `Blim`) during the last 20 years of the simulation.
+> **TASK:**  Set up an loop to run the above MSE with uncertainty for 100 runs, and record the true biomass (`Breal`) from each run in a matrix (years (rows) by runs (cols)). Calculate the number of runs that dropped below the biomass threshold of 350 (i.e. `Blim`) during the last 20 years of the simulation.
 
-> **\textcolor{blue}{TASK:}**  Try different combinations of `Btrig` and `Ftarg`. Record the probability of dropping below `Blim` and the mean yield. Try and identify the combination resulting in the highest mean yield while having a risk lower than 5\%.
+> **TASK:**  Try different combinations of `Btrig` and `Ftarg`. Record the probability of dropping below `Blim` and the mean yield. Try and identify the combination resulting in the highest mean yield while having a risk lower than 5\%.
 
 \newpage
 
@@ -2413,13 +2410,13 @@ metapop <- function(
 ```
 
 
-> **\textcolor{blue}{TASK:}** Using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) affect the probability of extinction over a period of 500 years. Assume no extinction correlation (*i.e.* `C = 0`) and maintain the default annual extinction probability (`P = 0.0005`). *Hint: low recolonization rates may be needed to observe a significant number of extinctions (e.g. R < 2%). Increasing the number of runs will improve the robustness of the result, but at a computation cost.*
+> **TASK:** Using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) affect the probability of extinction over a period of 500 years. Assume no extinction correlation (*i.e.* `C = 0`) and maintain the default annual extinction probability (`P = 0.0005`). *Hint: low recolonization rates may be needed to observe a significant number of extinctions (e.g. R < 2%). Increasing the number of runs will improve the robustness of the result, but at a computation cost.*
 
-> **\textcolor{blue}{EXTRA TASK:}** Try and create a single plot with the results from several recolonization settings. Add a labels or a legend to aid in the plot's interpretation. 
+> **Extra TASK:** Try and create a single plot with the results from several recolonization settings. Add a labels or a legend to aid in the plot's interpretation. 
 
 You should observe the probability of extinction increasing over time as additional metapopulations become extinct. Nevertheless, rates should be quite low given the rate of annual extinction. We will now focus on the cumulative extinction probability after 500 years. In addition to recolonization, will will now look at the importance of extinction correlations.
 
-> **\textcolor{blue}{TASK:}** Again, using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) and extinction correlation (`0 < C < 1`) affect the probability of extinction over a period of 500 years. Keep track of the parameters used and their results for following group discussion (or plot on your own). 
+> **TASK:** Again, using the 3-pop. metapopulation, explore how different levels of recolonization (`R`) and extinction correlation (`0 < C < 1`) affect the probability of extinction over a period of 500 years. Keep track of the parameters used and their results for following group discussion (or plot on your own). 
 
 
 
